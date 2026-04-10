@@ -1,10 +1,16 @@
 const DEMO_DB_STORAGE_KEY = "xrevia-lms-demo-db";
 const DEMO_ROLE_STORAGE_KEY = "xrevia-lms-demo-role";
+const DEMO_USER_ID_STORAGE_KEY = "xrevia-lms-demo-user-id";
 const DEMO_ROLES = ["student", "teacher", "admin"];
 const DEMO_VIEWER_MODE = {
   student: "student",
   teacher: "doctor",
   admin: "admin",
+};
+const DEMO_ROLE_LABELS = {
+  student: "Student",
+  teacher: "Professor",
+  admin: "Administrator",
 };
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
@@ -335,6 +341,7 @@ const persistDemoDatabase = () => {
 const resetDemoDatabase = () => {
   demoDb = seedDemoDatabase();
   persistDemoDatabase();
+  clearStoredDemoUserId();
 };
 
 const nextId = (collection) => Math.max(0, ...demoDb[collection].map((row) => Number(row.id) || 0)) + 1;
@@ -346,8 +353,114 @@ const questionById = () => new Map(demoDb.questions.map((question) => [question.
 const assignmentById = () => new Map(demoDb.assignments.map((assignment) => [assignment.id, assignment]));
 const sessionById = () => new Map(demoDb.attendanceSessions.map((session) => [session.id, session]));
 const relation = (map, id, fallback = "Record") => [id, map.get(id)?.name || fallback];
+const demoUserById = (userId) => demoDb.users.find((user) => user.id === Number(userId)) || null;
 const actorForRole = (role) => demoDb.users.find((user) => user.role === normalizeRole(role)) || demoDb.users[0];
 const studentUsers = () => demoDb.users.filter((user) => user.role === "student");
+
+export const getStoredDemoUserId = () => {
+  if (typeof window === "undefined") return null;
+  const params = new URLSearchParams(window.location.search);
+  const queryUserId = Number(params.get("user"));
+  if (Number.isFinite(queryUserId) && demoUserById(queryUserId)) {
+    window.localStorage.setItem(DEMO_USER_ID_STORAGE_KEY, String(queryUserId));
+    return queryUserId;
+  }
+  const stored = Number(window.localStorage.getItem(DEMO_USER_ID_STORAGE_KEY) || "");
+  if (Number.isFinite(stored) && demoUserById(stored)) {
+    return stored;
+  }
+  window.localStorage.removeItem(DEMO_USER_ID_STORAGE_KEY);
+  return null;
+};
+
+export const setStoredDemoUserId = (userId) => {
+  const actor = demoUserById(userId);
+  if (!actor) {
+    throw new Error("That demo account could not be found.");
+  }
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(DEMO_USER_ID_STORAGE_KEY, String(actor.id));
+  }
+  setStoredDemoRole(actor.role);
+  return actor.id;
+};
+
+export const clearStoredDemoUserId = () => {
+  if (typeof window !== "undefined") {
+    window.localStorage.removeItem(DEMO_USER_ID_STORAGE_KEY);
+  }
+};
+
+const actorForContext = (role, userId = null) =>
+  demoUserById(userId) || demoUserById(getStoredDemoUserId()) || actorForRole(role);
+
+export const getDemoAccounts = () => {
+  const studentCount = demoDb.users.filter((user) => user.role === "student").length;
+  return clone(
+    demoDb.users
+      .slice()
+      .sort((left, right) => {
+        const roleDiff = DEMO_ROLES.indexOf(left.role) - DEMO_ROLES.indexOf(right.role);
+        return roleDiff || left.name.localeCompare(right.name);
+      })
+      .map((user) => {
+        const teachingCount = demoDb.courses.filter((course) => course.teacher_id === user.id).length;
+        const enrolledCount = demoDb.enrollments.filter((enrollment) => enrollment.student_id === user.id).length;
+        const summary =
+          user.role === "student"
+            ? `${user.program || "University Student"}${user.semester ? ` · ${user.semester}` : ""}`
+            : user.role === "teacher"
+              ? `${teachingCount} course${teachingCount === 1 ? "" : "s"} teaching`
+              : `${demoDb.courses.length} courses · ${studentCount} students`;
+
+        return {
+          id: user.id,
+          role: user.role,
+          roleLabel: DEMO_ROLE_LABELS[user.role] || "User",
+          name: user.name,
+          login: user.login,
+          email: user.email,
+          avatarUrl: user.avatar_url || "",
+          initials: user.name
+            .split(/\s+/)
+            .filter(Boolean)
+            .slice(0, 2)
+            .map((part) => part[0]?.toUpperCase() || "")
+            .join(""),
+          lastLogin: user.last_login || user.login_date || "",
+          summary,
+          badge:
+            user.role === "student"
+              ? `${enrolledCount} enrolled course${enrolledCount === 1 ? "" : "s"}`
+              : user.role === "teacher"
+                ? `${demoDb.enrollments.filter((enrollment) => demoDb.courses.some((course) => course.id === enrollment.course_id && course.teacher_id === user.id)).length} students`
+                : "Full university control",
+        };
+      }),
+  );
+};
+
+export const loginDemoUser = (userId) => {
+  const actor = demoUserById(userId);
+  if (!actor) {
+    throw new Error("That demo account is no longer available.");
+  }
+  const loginStamp = nowIso();
+  actor.last_login = loginStamp;
+  actor.login_date = loginStamp;
+  actor.write_date = loginStamp;
+  persistDemoDatabase();
+  setStoredDemoRole(actor.role);
+  setStoredDemoUserId(actor.id);
+  return {
+    userId: actor.id,
+    role: actor.role,
+  };
+};
+
+export const logoutDemoUser = () => {
+  clearStoredDemoUserId();
+};
 
 const enrollmentStats = (enrollment) => {
   const lessons = demoDb.lessons.filter((lesson) => lesson.course_id === enrollment.course_id);
@@ -695,9 +808,9 @@ const buildStaffPayload = (actor, computed, role) => {
   };
 };
 
-export const buildDemoPayload = (role = "student") => {
-  const normalizedRole = normalizeRole(role);
-  const actor = actorForRole(normalizedRole);
+export const buildDemoPayload = (role = "student", userId = null) => {
+  const actor = actorForContext(role, userId);
+  const normalizedRole = normalizeRole(actor?.role || role);
   const computed = buildComputedRows();
   return normalizedRole === "student" ? buildStudentPayload(actor, computed) : buildStaffPayload(actor, computed, normalizedRole);
 };
@@ -736,11 +849,13 @@ export const cycleStoredDemoRole = (currentRole) => {
   return setStoredDemoRole(nextRole);
 };
 
-const actorPayload = (role) => {
-  const actor = actorForRole(role);
+const actorPayload = (role, userId = null) => {
+  const actor = actorForContext(role, userId);
   return {
     student: {
       name: actor.name,
+      program: actor.program || "",
+      semester: actor.semester || "",
       login: actor.login,
       email: actor.email,
       phone: actor.phone,
@@ -754,9 +869,9 @@ const actorPayload = (role) => {
   };
 };
 
-const ensureTeacherCourse = (role, courseId) => {
-  if (role !== "teacher") return;
-  const actor = actorForRole(role);
+const ensureTeacherCourse = (role, userId, courseId) => {
+  const actor = actorForContext(role, userId);
+  if (actor.role !== "teacher") return;
   const course = demoDb.courses.find((row) => row.id === Number(courseId));
   if (course && course.teacher_id !== actor.id) {
     throw new Error("This demo teacher can only manage assigned courses.");
@@ -766,8 +881,8 @@ const ensureTeacherCourse = (role, courseId) => {
 export const demoApi = {
   reset: resetDemoDatabase,
 
-  trackLesson(role, lessonId, action = "open", progressPercent = null) {
-    const actor = actorForRole(role);
+  trackLesson(role, userId, lessonId, action = "open", progressPercent = null) {
+    const actor = actorForContext(role, userId);
     const lesson = demoDb.lessons.find((row) => row.id === Number(lessonId));
     if (!lesson || actor.role !== "student") {
       throw new Error("Lesson progress is available only in student demo mode.");
@@ -799,27 +914,27 @@ export const demoApi = {
     return { message: "Lesson progress updated." };
   },
 
-  updateProfile(role, profile) {
-    const actor = actorForRole(role);
+  updateProfile(role, userId, profile) {
+    const actor = actorForContext(role, userId);
     actor.name = profile.fullName?.trim() || actor.name;
     actor.email = profile.email?.trim() || "";
     actor.phone = profile.phone?.trim() || "";
     actor.notifications = { ...actor.notifications, ...(profile.notifications || {}) };
     actor.write_date = nowIso();
     persistDemoDatabase();
-    return { message: "Profile updated.", ...actorPayload(role) };
+    return { message: "Profile updated.", ...actorPayload(role, userId) };
   },
 
-  updateAvatar(role, imageBase64, clear = false) {
-    const actor = actorForRole(role);
+  updateAvatar(role, userId, imageBase64, clear = false) {
+    const actor = actorForContext(role, userId);
     actor.avatar_url = clear ? "" : imageBase64 || actor.avatar_url || "";
     actor.write_date = nowIso();
     persistDemoDatabase();
-    return { message: clear ? "Profile photo removed." : "Profile photo updated.", ...actorPayload(role) };
+    return { message: clear ? "Profile photo removed." : "Profile photo updated.", ...actorPayload(role, userId) };
   },
 
-  changePassword(role, currentPassword, newPassword) {
-    const actor = actorForRole(role);
+  changePassword(role, userId, currentPassword, newPassword) {
+    const actor = actorForContext(role, userId);
     if (actor.password !== currentPassword) {
       throw new Error("Your current password is incorrect.");
     }
@@ -829,8 +944,8 @@ export const demoApi = {
     return { message: "Password updated successfully." };
   },
 
-  saveCourse(role, courseId, values) {
-    ensureTeacherCourse(role, courseId);
+  saveCourse(role, userId, courseId, values) {
+    ensureTeacherCourse(role, userId, courseId);
     const course = demoDb.courses.find((row) => row.id === Number(courseId));
     if (!course) throw new Error("Course not found.");
     Object.assign(course, values, { write_date: nowIso() });
@@ -838,8 +953,8 @@ export const demoApi = {
     return { message: "Course updated." };
   },
 
-  createLesson(role, values) {
-    ensureTeacherCourse(role, values.course_id);
+  createLesson(role, userId, values) {
+    ensureTeacherCourse(role, userId, values.course_id);
     demoDb.lessons.push({
       id: nextId("lessons"),
       ...values,
@@ -852,19 +967,19 @@ export const demoApi = {
     return { message: "Lesson created." };
   },
 
-  updateLesson(role, lessonId, values) {
+  updateLesson(role, userId, lessonId, values) {
     const lesson = demoDb.lessons.find((row) => row.id === Number(lessonId));
     if (!lesson) throw new Error("Lesson not found.");
-    ensureTeacherCourse(role, lesson.course_id);
+    ensureTeacherCourse(role, userId, lesson.course_id);
     Object.assign(lesson, values, { write_date: nowIso() });
     persistDemoDatabase();
     return { message: "Lesson updated." };
   },
 
-  deleteLesson(role, lessonId) {
+  deleteLesson(role, userId, lessonId) {
     const lesson = demoDb.lessons.find((row) => row.id === Number(lessonId));
     if (!lesson) return { message: "Lesson deleted." };
-    ensureTeacherCourse(role, lesson.course_id);
+    ensureTeacherCourse(role, userId, lesson.course_id);
     demoDb.lessons = demoDb.lessons.filter((row) => row.id !== lesson.id);
     demoDb.lessonProgress = demoDb.lessonProgress.filter((row) => row.lesson_id !== lesson.id);
     demoDb.attendanceSessions = demoDb.attendanceSessions.map((session) => (session.lesson_id === lesson.id ? { ...session, lesson_id: null } : session));
@@ -872,32 +987,32 @@ export const demoApi = {
     return { message: "Lesson deleted." };
   },
 
-  createAnnouncement(role, values) {
-    ensureTeacherCourse(role, values.course_id);
+  createAnnouncement(role, userId, values) {
+    ensureTeacherCourse(role, userId, values.course_id);
     demoDb.announcements.unshift({ id: nextId("announcements"), ...values, date: values.date || nowIso(), create_date: nowIso() });
     persistDemoDatabase();
     return { message: "Announcement created." };
   },
 
-  updateAnnouncement(role, announcementId, values) {
+  updateAnnouncement(role, userId, announcementId, values) {
     const announcement = demoDb.announcements.find((row) => row.id === Number(announcementId));
     if (!announcement) throw new Error("Announcement not found.");
-    ensureTeacherCourse(role, announcement.course_id);
+    ensureTeacherCourse(role, userId, announcement.course_id);
     Object.assign(announcement, values, { write_date: nowIso() });
     persistDemoDatabase();
     return { message: "Announcement updated." };
   },
 
-  deleteAnnouncement(role, announcementId) {
+  deleteAnnouncement(role, userId, announcementId) {
     const announcement = demoDb.announcements.find((row) => row.id === Number(announcementId));
-    if (announcement) ensureTeacherCourse(role, announcement.course_id);
+    if (announcement) ensureTeacherCourse(role, userId, announcement.course_id);
     demoDb.announcements = demoDb.announcements.filter((row) => row.id !== Number(announcementId));
     persistDemoDatabase();
     return { message: "Announcement deleted." };
   },
 
-  saveAssignment(role, courseId, values, assignmentId = null) {
-    ensureTeacherCourse(role, courseId);
+  saveAssignment(role, userId, courseId, values, assignmentId = null) {
+    ensureTeacherCourse(role, userId, courseId);
     const resourceUrl = values.resource_file || values.resource_url || values.resourceUrl || "";
     if (assignmentId) {
       const assignment = demoDb.assignments.find((row) => row.id === Number(assignmentId));
@@ -913,7 +1028,7 @@ export const demoApi = {
 
     demoDb.assignments.unshift({
       id: nextId("assignments"),
-      teacher_id: actorForRole(role).id,
+      teacher_id: actorForContext(role, userId).id,
       course_id: Number(courseId),
       ...values,
       resource_url: resourceUrl,
@@ -924,17 +1039,17 @@ export const demoApi = {
     return { message: "Assignment created." };
   },
 
-  deleteAssignment(role, assignmentId) {
+  deleteAssignment(role, userId, assignmentId) {
     const assignment = demoDb.assignments.find((row) => row.id === Number(assignmentId));
-    if (assignment) ensureTeacherCourse(role, assignment.course_id);
+    if (assignment) ensureTeacherCourse(role, userId, assignment.course_id);
     demoDb.assignments = demoDb.assignments.filter((row) => row.id !== Number(assignmentId));
     demoDb.assignmentSubmissions = demoDb.assignmentSubmissions.filter((row) => row.assignment_id !== Number(assignmentId));
     persistDemoDatabase();
     return { message: "Assignment deleted." };
   },
 
-  submitAssignment(role, assignmentId, submission) {
-    const actor = actorForRole(role);
+  submitAssignment(role, userId, assignmentId, submission) {
+    const actor = actorForContext(role, userId);
     if (actor.role !== "student") throw new Error("Assignments can only be submitted in student demo mode.");
     const assignment = demoDb.assignments.find((row) => row.id === Number(assignmentId));
     if (!assignment) throw new Error("Assignment not found.");
@@ -974,10 +1089,10 @@ export const demoApi = {
     return { message: "Assignment submitted successfully." };
   },
 
-  gradeAssignment(role, submissionId, values) {
+  gradeAssignment(role, userId, submissionId, values) {
     const submission = demoDb.assignmentSubmissions.find((row) => row.id === Number(submissionId));
     if (!submission) throw new Error("Submission not found.");
-    ensureTeacherCourse(role, submission.course_id);
+    ensureTeacherCourse(role, userId, submission.course_id);
     const assignment = demoDb.assignments.find((row) => row.id === submission.assignment_id);
     const maxScore = Number(assignment?.max_score) || 100;
     const score = Number(values.score) || 0;
@@ -991,8 +1106,8 @@ export const demoApi = {
     return { message: "Submission graded." };
   },
 
-  createEnrollment(role, values) {
-    ensureTeacherCourse(role, values.course_id);
+  createEnrollment(role, userId, values) {
+    ensureTeacherCourse(role, userId, values.course_id);
     const exists = demoDb.enrollments.some(
       (row) => row.course_id === Number(values.course_id) && row.student_id === Number(values.student_id),
     );
@@ -1011,16 +1126,16 @@ export const demoApi = {
     return { message: "Student enrolled successfully." };
   },
 
-  deleteEnrollment(role, enrollmentId) {
+  deleteEnrollment(role, userId, enrollmentId) {
     const enrollment = demoDb.enrollments.find((row) => row.id === Number(enrollmentId));
-    if (enrollment) ensureTeacherCourse(role, enrollment.course_id);
+    if (enrollment) ensureTeacherCourse(role, userId, enrollment.course_id);
     demoDb.enrollments = demoDb.enrollments.filter((row) => row.id !== Number(enrollmentId));
     persistDemoDatabase();
     return { message: "Enrollment removed." };
   },
 
-  createAttendanceSession(role, values) {
-    ensureTeacherCourse(role, values.courseId);
+  createAttendanceSession(role, userId, values) {
+    ensureTeacherCourse(role, userId, values.courseId);
     demoDb.attendanceSessions.unshift({
       id: nextId("attendanceSessions"),
       course_id: Number(values.courseId),
@@ -1034,10 +1149,10 @@ export const demoApi = {
     return { message: "Attendance session created." };
   },
 
-  saveAttendance(role, sessionId, records, closeSession = false) {
+  saveAttendance(role, userId, sessionId, records, closeSession = false) {
     const session = demoDb.attendanceSessions.find((row) => row.id === Number(sessionId));
     if (!session) throw new Error("Attendance session not found.");
-    ensureTeacherCourse(role, session.course_id);
+    ensureTeacherCourse(role, userId, session.course_id);
     if (session.status === "closed") {
       throw new Error("This attendance session is closed. Reopen it before making changes.");
     }
@@ -1073,43 +1188,43 @@ export const demoApi = {
     return { message: closeSession ? "Attendance saved and session closed." : "Attendance saved." };
   },
 
-  reopenAttendanceSession(role, sessionId) {
+  reopenAttendanceSession(role, userId, sessionId) {
     const session = demoDb.attendanceSessions.find((row) => row.id === Number(sessionId));
     if (!session) throw new Error("Attendance session not found.");
-    ensureTeacherCourse(role, session.course_id);
+    ensureTeacherCourse(role, userId, session.course_id);
     session.status = "draft";
     persistDemoDatabase();
     return { message: "Attendance session reopened." };
   },
 
-  deleteAttendanceSession(role, sessionId) {
+  deleteAttendanceSession(role, userId, sessionId) {
     const session = demoDb.attendanceSessions.find((row) => row.id === Number(sessionId));
-    if (session) ensureTeacherCourse(role, session.course_id);
+    if (session) ensureTeacherCourse(role, userId, session.course_id);
     demoDb.attendanceSessions = demoDb.attendanceSessions.filter((row) => row.id !== Number(sessionId));
     demoDb.attendanceRecords = demoDb.attendanceRecords.filter((row) => row.session_id !== Number(sessionId));
     persistDemoDatabase();
     return { message: "Attendance session deleted." };
   },
 
-  createQuiz(role, values) {
-    ensureTeacherCourse(role, values.course_id);
+  createQuiz(role, userId, values) {
+    ensureTeacherCourse(role, userId, values.course_id);
     demoDb.quizzes.unshift({ id: nextId("quizzes"), ...values, course_id: Number(values.course_id), create_date: nowIso(), write_date: nowIso() });
     persistDemoDatabase();
     return { message: "Quiz created." };
   },
 
-  updateQuiz(role, quizId, values) {
+  updateQuiz(role, userId, quizId, values) {
     const quiz = demoDb.quizzes.find((row) => row.id === Number(quizId));
     if (!quiz) throw new Error("Quiz not found.");
-    ensureTeacherCourse(role, quiz.course_id);
+    ensureTeacherCourse(role, userId, quiz.course_id);
     Object.assign(quiz, values, { write_date: nowIso() });
     persistDemoDatabase();
     return { message: "Quiz updated." };
   },
 
-  deleteQuiz(role, quizId) {
+  deleteQuiz(role, userId, quizId) {
     const quiz = demoDb.quizzes.find((row) => row.id === Number(quizId));
-    if (quiz) ensureTeacherCourse(role, quiz.course_id);
+    if (quiz) ensureTeacherCourse(role, userId, quiz.course_id);
     demoDb.quizzes = demoDb.quizzes.filter((row) => row.id !== Number(quizId));
     const questionIds = demoDb.questions.filter((row) => row.quiz_id === Number(quizId)).map((row) => row.id);
     const resultIds = demoDb.quizResults.filter((row) => row.quiz_id === Number(quizId)).map((row) => row.id);
@@ -1120,30 +1235,30 @@ export const demoApi = {
     return { message: "Quiz deleted." };
   },
 
-  createQuestion(role, values) {
+  createQuestion(role, userId, values) {
     const quiz = demoDb.quizzes.find((row) => row.id === Number(values.quiz_id));
     if (!quiz) throw new Error("Quiz not found.");
-    ensureTeacherCourse(role, quiz.course_id);
+    ensureTeacherCourse(role, userId, quiz.course_id);
     demoDb.questions.push({ id: nextId("questions"), ...values, quiz_id: Number(values.quiz_id) });
     persistDemoDatabase();
     return { message: "Question created." };
   },
 
-  updateQuestion(role, questionId, values) {
+  updateQuestion(role, userId, questionId, values) {
     const question = demoDb.questions.find((row) => row.id === Number(questionId));
     if (!question) throw new Error("Question not found.");
     const quiz = demoDb.quizzes.find((row) => row.id === question.quiz_id);
-    if (quiz) ensureTeacherCourse(role, quiz.course_id);
+    if (quiz) ensureTeacherCourse(role, userId, quiz.course_id);
     Object.assign(question, values);
     persistDemoDatabase();
     return { message: "Question updated." };
   },
 
-  deleteQuestion(role, questionId) {
+  deleteQuestion(role, userId, questionId) {
     const question = demoDb.questions.find((row) => row.id === Number(questionId));
     if (question) {
       const quiz = demoDb.quizzes.find((row) => row.id === question.quiz_id);
-      if (quiz) ensureTeacherCourse(role, quiz.course_id);
+      if (quiz) ensureTeacherCourse(role, userId, quiz.course_id);
     }
     demoDb.questions = demoDb.questions.filter((row) => row.id !== Number(questionId));
     demoDb.quizResultLines = demoDb.quizResultLines.filter((row) => row.question_id !== Number(questionId));
@@ -1151,8 +1266,8 @@ export const demoApi = {
     return { message: "Question deleted." };
   },
 
-  submitQuiz(role, quizId, answers) {
-    const actor = actorForRole(role);
+  submitQuiz(role, userId, quizId, answers) {
+    const actor = actorForContext(role, userId);
     if (actor.role !== "student") throw new Error("Quizzes can only be submitted in student demo mode.");
     const quiz = demoDb.quizzes.find((row) => row.id === Number(quizId));
     if (!quiz) throw new Error("Quiz not found.");

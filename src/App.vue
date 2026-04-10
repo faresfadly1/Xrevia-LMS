@@ -1,5 +1,15 @@
 <template>
+  <DemoLogin
+    v-if="showDemoLogin"
+    :accounts="store.demoAccounts"
+    :submitting="store.loading"
+    :theme-mode="themeMode"
+    @login="loginDemoAccount"
+    @toggle-theme="toggleThemeMode"
+  />
+
   <div
+    v-else
     class="reference-shell"
     :class="[
       `reference-shell--${currentRole}`,
@@ -101,7 +111,10 @@
       <main class="reference-surface">
         <div v-if="store.error" class="reference-alert">{{ store.error }}</div>
         <div v-else-if="store.loading" class="reference-alert reference-alert--info">Loading your university workspace...</div>
-        <div v-if="isDemoMode && !store.error && !store.loading" class="reference-alert reference-alert--info">Demo mode is active. Use the shield icon in the top bar to switch between Student, Teacher, and Admin views.</div>
+        <div v-if="isDemoMode && !store.error && !store.loading" class="reference-alert reference-alert--info">
+          Demo mode is active. Use logout or the account-switch icon in the top bar to jump between student, teacher,
+          and admin users.
+        </div>
 
         <StudentDashboard
           v-if="!store.error && !store.loading && activeNavItem?.kind === 'dashboard' && currentRole === 'student'"
@@ -645,6 +658,7 @@ import StudentDashboard from "./components/dashboard/StudentDashboard.vue";
 import TeacherDashboard from "./components/dashboard/TeacherDashboard.vue";
 import AdminDashboard from "./components/dashboard/AdminDashboard.vue";
 import CourseHubPage from "./components/dashboard/CourseHubPage.vue";
+import DemoLogin from "./components/DemoLogin.vue";
 
 const store = useLmsStore();
 const searchQuery = ref("");
@@ -673,6 +687,7 @@ const notificationForm = ref({ announcements: true, quizzes: true, progress: tru
 const passwordForm = ref({ currentPassword: "", newPassword: "", confirmPassword: "" });
 const activeNavKey = ref("dashboard");
 const isDemoMode = computed(() => store.environmentMode === "demo");
+const showDemoLogin = computed(() => isDemoMode.value && store.requiresDemoLogin);
 
 const notificationOptions = [
   {
@@ -855,7 +870,7 @@ const topbarActions = computed(() => {
   const utilityActions = isDemoMode.value
     ? [
         { key: "theme", icon: themeMode.value === "dark" ? "fas fa-sun" : "far fa-moon", action: "toggle-theme" },
-        { key: "role-switch", icon: "fas fa-user-shield", action: "cycle-role" },
+        { key: "account-switch", icon: "fas fa-user-shield", action: "switch-account" },
         { key: "workspace-settings", icon: "fas fa-cog", action: currentRole.value === "admin" ? "settings" : "account" },
       ]
     : [
@@ -1781,7 +1796,7 @@ const resetPasswordForm = () => {
 
 const navigateTo = (key) => {
   if (key === "logout") {
-    logoutNow();
+    void logoutNow();
     return;
   }
   const item = navLookup.value[key] || hiddenItems.find((entry) => entry.key === key);
@@ -1795,16 +1810,27 @@ const navigateTo = (key) => {
   }
 };
 
+const resetWorkspaceUi = () => {
+  searchQuery.value = "";
+  activeNavKey.value = "dashboard";
+  selectedCourseId.value = null;
+  selectedQuizId.value = null;
+  quizAnswers.value = {};
+  quizFeedback.value = { type: "", message: "" };
+};
+
+const toggleThemeMode = () => {
+  themeMode.value = themeMode.value === "dark" ? "light" : "dark";
+};
+
 const handleTopbarAction = async (action) => {
   if (action.action === "toggle-theme") {
-    themeMode.value = themeMode.value === "dark" ? "light" : "dark";
+    toggleThemeMode();
     return;
   }
-  if (action.action === "cycle-role") {
-    await store.cycleDemoRole();
-    activeNavKey.value = "dashboard";
-    selectedCourseId.value = null;
-    selectedQuizId.value = null;
+  if (action.action === "switch-account") {
+    resetWorkspaceUi();
+    await store.logoutDemo();
     return;
   }
   if (action.action === "backend") {
@@ -2122,13 +2148,15 @@ const savePasswordChange = async () => {
   }
 };
 
-const logoutNow = () => {
+const loginDemoAccount = async (userId) => {
+  resetWorkspaceUi();
+  await store.loginDemo(userId);
+};
+
+const logoutNow = async () => {
   if (isDemoMode.value) {
-    searchQuery.value = "";
-    activeNavKey.value = "dashboard";
-    selectedCourseId.value = null;
-    selectedQuizId.value = null;
-    void store.setDemoRole("student");
+    resetWorkspaceUi();
+    await store.logoutDemo();
     return;
   }
   window.location.href = "/web/session/logout?redirect=/web/login";
