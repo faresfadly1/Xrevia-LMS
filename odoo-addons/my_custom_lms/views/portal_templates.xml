@@ -1,0 +1,169 @@
+<odoo>
+    <template id="portal_my_courses" name="My Courses">
+        <t t-call="portal.portal_layout">
+            <t t-set="title">My Courses</t>
+            <div class="container mt-4">
+                <h2>My Courses</h2>
+                <div class="row mt-3">
+                    <t t-foreach="courses" t-as="course">
+                        <div class="col-12 col-md-6 col-lg-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <t t-esc="course.name"/>
+                                    </h5>
+                                    <p class="card-text">
+                                        <t t-esc="course.description or ''"/>
+                                    </p>
+                                    <a t-attf-href="/my/course/#{course.id}" class="btn btn-primary">Open</a>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_course_detail" name="Course Detail">
+        <t t-call="portal.portal_layout">
+            <t t-set="title">Course</t>
+            <div class="container mt-4">
+                <h2><t t-esc="course.name"/></h2>
+                <p><t t-esc="course.description or ''"/></p>
+
+                <div class="mt-3">
+                    <a t-attf-href="/my/course/#{course.id}/lessons" class="btn btn-secondary">View Lessons</a>
+                </div>
+
+                <div class="mt-4">
+                    <h4>Announcements</h4>
+                    <ul class="list-group">
+                        <t t-foreach="announcements" t-as="ann">
+                            <li class="list-group-item">
+                                <strong><t t-esc="ann.title"/></strong>
+                                <div class="text-muted"><t t-esc="ann.date"/></div>
+                                <div><t t-esc="ann.message"/></div>
+                            </li>
+                        </t>
+                        <t t-if="not announcements">
+                            <li class="list-group-item">No announcements.</li>
+                        </t>
+                    </ul>
+                </div>
+
+                <div class="mt-4">
+                    <h4>Quizzes</h4>
+                    <ul class="list-group">
+                        <t t-foreach="quizzes" t-as="quiz">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><t t-esc="quiz.name"/></span>
+                                <a t-attf-href="/my/course/#{course.id}/quiz/#{quiz.id}" class="btn btn-outline-primary btn-sm">Take Quiz</a>
+                            </li>
+                        </t>
+                        <t t-if="not quizzes">
+                            <li class="list-group-item">No quizzes.</li>
+                        </t>
+                    </ul>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_course_lessons" name="Course Lessons">
+        <t t-call="portal.portal_layout">
+            <t t-set="title">Lessons</t>
+            <div class="container mt-4">
+                <h2>Lessons - <t t-esc="course.name"/></h2>
+                <t t-foreach="lessons" t-as="lesson">
+                    <div class="card my-3">
+                        <div class="card-body">
+                            <h5 class="card-title"><t t-esc="lesson.name"/></h5>
+                            <t t-if="lesson.video_url">
+                                <p><a t-att-href="lesson.video_url" target="_blank">Video Link</a></p>
+                            </t>
+                            <t t-if="lesson.file">
+                                <p><a t-attf-href="/web/content/lms.lesson/#{lesson.id}/file?download=1">Download File</a></p>
+                            </t>
+                            <div t-if="lesson.content">
+                                <t t-raw="lesson.content"/>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+                <t t-if="not lessons">
+                    <p>No lessons yet.</p>
+                </t>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_course_quiz" name="Course Quiz">
+        <t t-call="portal.portal_layout">
+            <t t-set="title">Quiz</t>
+            <div class="container mt-4">
+                <h2><t t-esc="quiz.name"/></h2>
+                <form t-attf-action="/my/course/#{course.id}/quiz/#{quiz.id}" method="post">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <t t-foreach="questions" t-as="q">
+                        <div class="card my-3">
+                            <div class="card-body">
+                                <p><strong><t t-esc="q.question_text"/></strong></p>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" t-att-name="'q_%s' % q.id" value="a"/>
+                                    <label class="form-check-label"><t t-esc="q.answer_a"/></label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" t-att-name="'q_%s' % q.id" value="b"/>
+                                    <label class="form-check-label"><t t-esc="q.answer_b"/></label>
+                                </div>
+                                <t t-if="q.answer_c">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" t-att-name="'q_%s' % q.id" value="c"/>
+                                        <label class="form-check-label"><t t-esc="q.answer_c"/></label>
+                                    </div>
+                                </t>
+                                <t t-if="q.answer_d">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" t-att-name="'q_%s' % q.id" value="d"/>
+                                        <label class="form-check-label"><t t-esc="q.answer_d"/></label>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </t>
+                    <button class="btn btn-primary" type="submit">Submit</button>
+                </form>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_quiz_result" name="Quiz Result">
+        <t t-call="portal.portal_layout">
+            <t t-set="title">Quiz Result</t>
+            <div class="container mt-4">
+                <h2>Result - <t t-esc="quiz.name"/></h2>
+                <p>Score: <strong><t t-esc="result.score"/></strong> / <t t-esc="result.max_score"/></p>
+                <p>Percentage: <t t-esc="'%.2f' % result.percentage"/>%</p>
+                <p t-if="result.passed" class="text-success">Passed</p>
+                <p t-if="not result.passed" class="text-danger">Not Passed</p>
+
+                <div class="mt-3">
+                    <h4>Answers</h4>
+                    <ul class="list-group">
+                        <t t-foreach="result.line_ids" t-as="line">
+                            <li class="list-group-item">
+                                <div><strong><t t-esc="line.question_id.question_text"/></strong></div>
+                                <div>Selected: <t t-esc="line.selected_answer.upper()"/> | Correct: <t t-esc="line.question_id.correct_answer.upper()"/></div>
+                                <div t-if="line.is_correct" class="text-success">Correct</div>
+                                <div t-if="not line.is_correct" class="text-danger">Wrong</div>
+                            </li>
+                        </t>
+                    </ul>
+                </div>
+            </div>
+        </t>
+    </template>
+
+
+</odoo>

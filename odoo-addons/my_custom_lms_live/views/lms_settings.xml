@@ -1,0 +1,41 @@
+<odoo>
+    <record id="view_res_config_settings_lms_visibility" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.lms.visibility</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="90"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app string="LMS" name="xrevia_lms" data-string="LMS" groups="base.group_system">
+                    <block title="Website Navigation Visibility">
+                        <div class="text-muted mb-3">Check to show an LMS section on the website. Uncheck to hide it. No LMS data is deleted.</div>
+                        <setting string="Dashboard" help="Show or hide Dashboard on the LMS website.">
+                            <field name="x_lms_show_dashboard"/>
+                        </setting>
+                        <setting string="Courses" help="Show or hide Courses on the LMS website.">
+                            <field name="x_lms_show_courses"/>
+                        </setting>
+                        <setting string="Lessons" help="Show or hide Lessons on the LMS website.">
+                            <field name="x_lms_show_lessons"/>
+                        </setting>
+                        <setting string="Announcements" help="Show or hide Announcements on the LMS website.">
+                            <field name="x_lms_show_announcements"/>
+                        </setting>
+                        <setting string="Enrollments" help="Show or hide Enrollments on the LMS website.">
+                            <field name="x_lms_show_enrollments"/>
+                        </setting>
+                        <setting string="Quizzes" help="Show or hide Quizzes on the LMS website.">
+                            <field name="x_lms_show_quizzes"/>
+                        </setting>
+                        <setting string="Questions" help="Show or hide Questions on the LMS website.">
+                            <field name="x_lms_show_questions"/>
+                        </setting>
+                        <setting string="Quiz Results" help="Show or hide Quiz Results on the LMS website.">
+                            <field name="x_lms_show_quiz_results"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>

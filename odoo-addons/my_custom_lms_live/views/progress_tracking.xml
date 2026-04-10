@@ -1,0 +1,119 @@
+<odoo>
+    <record id="view_lms_enrollment_tree_live_progress" model="ir.ui.view">
+        <field name="name">lms.enrollment.tree.live.progress</field>
+        <field name="model">lms.enrollment</field>
+        <field name="inherit_id" ref="my_custom_lms.view_lms_enrollment_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='progress']" position="after">
+                <field name="x_completed_lessons"/>
+                <field name="x_total_lessons"/>
+                <field name="x_last_activity_on"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_lms_enrollment_form_live_progress" model="ir.ui.view">
+        <field name="name">lms.enrollment.form.live.progress</field>
+        <field name="model">lms.enrollment</field>
+        <field name="inherit_id" ref="my_custom_lms.view_lms_enrollment_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='progress']" position="after">
+                <field name="x_completed_lessons" readonly="1"/>
+                <field name="x_total_lessons" readonly="1"/>
+                <field name="x_last_activity_on" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_lms_lesson_progress_tree" model="ir.ui.view">
+        <field name="name">lms.lesson.progress.tree</field>
+        <field name="model">lms.lesson.progress</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="student_id"/>
+                <field name="course_id"/>
+                <field name="lesson_id"/>
+                <field name="status"/>
+                <field name="progress_percent"/>
+                <field name="last_opened_on"/>
+                <field name="completed_on"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lms_lesson_progress_form" model="ir.ui.view">
+        <field name="name">lms.lesson.progress.form</field>
+        <field name="model">lms.lesson.progress</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="student_id"/>
+                        <field name="course_id" readonly="1"/>
+                        <field name="lesson_id"/>
+                        <field name="status"/>
+                        <field name="progress_percent"/>
+                        <field name="first_opened_on"/>
+                        <field name="last_opened_on"/>
+                        <field name="completed_on"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lms_lesson_progress_search" model="ir.ui.view">
+        <field name="name">lms.lesson.progress.search</field>
+        <field name="model">lms.lesson.progress</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="student_id"/>
+                <field name="course_id"/>
+                <field name="lesson_id"/>
+                <field name="status"/>
+                <filter name="in_progress" string="In Progress" domain="[('status', '=', 'in_progress')]"/>
+                <filter name="completed" string="Completed" domain="[('status', '=', 'completed')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_course" string="Course" context="{'group_by': 'course_id'}"/>
+                    <filter name="group_lesson" string="Lesson" context="{'group_by': 'lesson_id'}"/>
+                    <filter name="group_student" string="Student" context="{'group_by': 'student_id'}"/>
+                    <filter name="group_status" string="Status" context="{'group_by': 'status'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_lms_lesson_progress_pivot" model="ir.ui.view">
+        <field name="name">lms.lesson.progress.pivot</field>
+        <field name="model">lms.lesson.progress</field>
+        <field name="arch" type="xml">
+            <pivot string="Progress Tracking">
+                <field name="course_id" type="row"/>
+                <field name="lesson_id" type="col"/>
+                <field name="progress_percent" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_lms_lesson_progress_graph" model="ir.ui.view">
+        <field name="name">lms.lesson.progress.graph</field>
+        <field name="model">lms.lesson.progress</field>
+        <field name="arch" type="xml">
+            <graph string="Progress Tracking" type="bar">
+                <field name="course_id"/>
+                <field name="progress_percent" type="measure"/>
+                <field name="lesson_id"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_lms_progress_tracking" model="ir.actions.act_window">
+        <field name="name">Progress Tracking</field>
+        <field name="res_model">lms.lesson.progress</field>
+        <field name="view_mode">pivot,graph,list,form</field>
+        <field name="search_view_id" ref="my_custom_lms_live.view_lms_lesson_progress_search"/>
+        <field name="context">{'group_by': 'course_id'}</field>
+    </record>
+
+    <menuitem id="menu_lms_progress_tracking" name="Progress Tracking" parent="my_custom_lms.menu_lms_root" action="my_custom_lms_live.action_lms_progress_tracking" sequence="76"/>
+</odoo>

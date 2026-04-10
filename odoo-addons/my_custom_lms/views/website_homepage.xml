@@ -1,0 +1,9 @@
+<odoo>
+    <record id="website_page_lms_home" model="website.page">
+        <field name="name">University LMS Home</field>
+        <field name="url">/</field>
+        <field name="is_homepage">True</field>
+        <field name="view_id" ref="xrevia_lms_vue.lms_index"/>
+        <field name="website_published">True</field>
+    </record>
+</odoo>

@@ -1,0 +1,87 @@
+<odoo>
+    <template id="lms_login_layout" inherit_id="website.login_layout" name="Xrevia LMS Login Layout" priority="90">
+        <xpath expr="//t[@t-call='website.layout']" position="replace">
+            <t t-call="web.frontend_layout">
+                <t t-set="title">Xrevia LMS | Secure Login</t>
+                <t t-set="html_data" t-value="{'style': 'height: 100%;'}"/>
+                <t t-set="body_classname" t-value="'x_lms_login_page'"/>
+                <t t-set="no_header" t-value="True"/>
+                <t t-set="no_footer" t-value="True"/>
+                <t t-set="head">
+                    <link rel="stylesheet" href="/my_custom_lms_live/static/src/css/lms_login.css?v=live4"/>
+                </t>
+
+                <section class="x_lms_login_shell">
+                    <aside class="x_lms_login_hero">
+                        <div class="x_lms_hero_glow x_lms_hero_glow_one"/>
+                        <div class="x_lms_hero_glow x_lms_hero_glow_two"/>
+                        <div class="x_lms_hero_inner">
+                            <div class="x_lms_brand_row">
+                                <div class="x_lms_brand_logo_wrap">
+                                    <img class="x_lms_brand_logo" src="/my_custom_lms_live/static/src/img/xrevia-university-logo.png" alt="Xrevia University logo"/>
+                                </div>
+                                <div>
+                                    <div class="x_lms_eyebrow">Xrevia University</div>
+                                    <div class="x_lms_brand_sub">LMS student and faculty portal</div>
+                                </div>
+                            </div>
+
+                            <h1>Welcome back to your University</h1>
+                            <p class="x_lms_hero_copy">
+                                One secure login for lessons, assessments, attendance, progress tracking,
+                                announcements, and faculty coordination.
+                            </p>
+
+                            <div class="x_lms_stat_grid">
+                                <div class="x_lms_stat_card">
+                                    <span>Progress</span>
+                                    <strong>Track lessons and attendance in real time</strong>
+                                </div>
+                                <div class="x_lms_stat_card">
+                                    <span>Assessments</span>
+                                    <strong>Take quizzes with deadlines and attempt limits</strong>
+                                </div>
+                                <div class="x_lms_stat_card">
+                                    <span>Support</span>
+                                    <strong>Built for students, faculty, and administrators</strong>
+                                </div>
+                            </div>
+
+                        </div>
+                    </aside>
+
+                    <div class="x_lms_login_panel">
+                        <div class="x_lms_login_card">
+                            <div class="x_lms_login_card_header">
+                                <div>
+                                    <div class="x_lms_login_tag">Secure Access</div>
+                                    <h2>Sign in to continue</h2>
+                                    <p>Use your student, faculty, or admin account to enter the Xrevia LMS portal.</p>
+                                </div>
+                                <div class="x_lms_login_status" t-if="db">
+                                    <span>Workspace</span>
+                                    <strong t-esc="db"/>
+                                </div>
+                            </div>
+
+                            <div class="x_lms_login_form_wrap">
+                                <t t-out="0"/>
+                            </div>
+
+
+                            <div class="x_lms_login_meta">
+                                <span>Need help? Contact your LMS administrator for access support.</span>
+                                <a t-if="not disable_database_manager" href="/web/database/manager">Manage Databases</a>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </t>
+        </xpath>
+    </template>
+    <template id="lms_login_redirect" inherit_id="web.login" name="Xrevia LMS Login Redirect" priority="90">
+        <xpath expr="//input[@name='redirect']" position="replace">
+            <input type="hidden" name="redirect" value="/xrevia/post_login_website"/>
+        </xpath>
+    </template>
+</odoo>

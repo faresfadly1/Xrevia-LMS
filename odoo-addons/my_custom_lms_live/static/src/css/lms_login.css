@@ -1,0 +1,498 @@
+body.x_lms_login_page {
+    min-height: 100vh;
+    margin: 0;
+    color: #0f172a;
+    background:
+        radial-gradient(circle at top left, rgba(205, 168, 92, 0.22), transparent 24%),
+        radial-gradient(circle at bottom right, rgba(84, 109, 158, 0.18), transparent 24%),
+        linear-gradient(135deg, #081729 0%, #102645 43%, #eef3fb 43%, #f8fafc 100%);
+    font-family: "Segoe UI", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+}
+
+body.x_lms_login_page #top,
+body.x_lms_login_page #bottom {
+    display: none !important;
+}
+
+body.x_lms_login_page #wrapwrap,
+body.x_lms_login_page #wrapwrap > main {
+    min-height: 100vh;
+}
+
+.x_lms_login_shell {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: minmax(320px, 1.15fr) minmax(360px, 0.85fr);
+}
+
+.x_lms_login_hero,
+.x_lms_login_panel {
+    position: relative;
+    padding: clamp(2rem, 4vw, 4rem);
+}
+
+.x_lms_login_hero {
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+}
+
+.x_lms_hero_inner {
+    position: relative;
+    z-index: 2;
+    max-width: 640px;
+    color: #f8fafc;
+    padding-top: 0.4rem;
+    transform: translateY(-1.6rem);
+}
+
+.x_lms_hero_glow {
+    position: absolute;
+    border-radius: 999px;
+    filter: blur(10px);
+    opacity: 0.8;
+}
+
+.x_lms_hero_glow_one {
+    width: 280px;
+    height: 280px;
+    top: 4rem;
+    right: 4rem;
+    background: rgba(212, 173, 99, 0.24);
+}
+
+.x_lms_hero_glow_two {
+    width: 220px;
+    height: 220px;
+    bottom: 5rem;
+    left: 2rem;
+    background: rgba(124, 97, 147, 0.22);
+}
+
+.x_lms_brand_row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+}
+
+.x_lms_brand_logo_wrap {
+    width: 86px;
+    height: 86px;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 18px 40px rgba(8, 23, 41, 0.28);
+    backdrop-filter: blur(12px);
+    flex-shrink: 0;
+}
+
+.x_lms_brand_logo {
+    width: 68px;
+    height: 68px;
+    object-fit: contain;
+    display: block;
+}
+
+.x_lms_eyebrow {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: rgba(255, 255, 255, 0.72);
+    margin-bottom: 0.25rem;
+}
+
+.x_lms_brand_sub {
+    color: rgba(255, 255, 255, 0.86);
+    font-size: 0.98rem;
+}
+
+.x_lms_login_hero h1 {
+    margin: 0;
+    font-size: clamp(2.5rem, 5vw, 4.15rem);
+    line-height: 0.97;
+    letter-spacing: -0.04em;
+}
+
+.x_lms_hero_copy {
+    max-width: 560px;
+    margin: 1.4rem 0 2rem;
+    font-size: 1.02rem;
+    line-height: 1.7;
+    color: rgba(239, 243, 251, 0.84);
+}
+
+.x_lms_stat_grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.x_lms_stat_card {
+    padding: 1rem 1rem 1.1rem;
+    border: 1px solid rgba(211, 175, 110, 0.38);
+    border-radius: 20px;
+    background: linear-gradient(180deg, rgba(255, 248, 236, 0.98), rgba(247, 241, 229, 0.94));
+    box-shadow: 0 16px 32px rgba(8, 23, 41, 0.18);
+}
+
+.x_lms_stat_card span {
+    display: block;
+    margin-bottom: 0.45rem;
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: #7a5a1f;
+}
+
+.x_lms_stat_card strong {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.5;
+    color: #102645;
+}
+
+.x_lms_feature_list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.75rem;
+}
+
+.x_lms_feature_list li {
+    position: relative;
+    padding-left: 1.6rem;
+    color: rgba(239, 243, 251, 0.9);
+    line-height: 1.5;
+}
+
+.x_lms_feature_list li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.48rem;
+    width: 0.68rem;
+    height: 0.68rem;
+    border-radius: 999px;
+    background: linear-gradient(145deg, #d3af6e, #ffffff);
+    box-shadow: 0 0 0 4px rgba(211, 175, 110, 0.18);
+}
+
+.x_lms_login_panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.x_lms_login_card {
+    width: min(100%, 480px);
+    padding: 2rem;
+    border-radius: 28px;
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(214, 223, 236, 0.96);
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.16);
+    backdrop-filter: blur(14px);
+}
+
+.x_lms_login_card_header {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1.4rem;
+}
+
+.x_lms_login_tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    background: #edf3fb;
+    color: #2e4465;
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 0.9rem;
+}
+
+.x_lms_login_card_header h2 {
+    margin: 0;
+    font-size: 2rem;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: #0f172a;
+}
+
+.x_lms_login_card_header p {
+    margin: 0.7rem 0 0;
+    color: #5f6b7a;
+    line-height: 1.6;
+}
+
+.x_lms_login_status {
+    flex-shrink: 0;
+    min-width: 120px;
+    padding: 0.85rem 0.9rem;
+    border-radius: 18px;
+    background: linear-gradient(180deg, #f8fbff, #eef2f8);
+    border: 1px solid #dde6f2;
+    text-align: left;
+}
+
+.x_lms_login_status span {
+    display: block;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: #64748b;
+    margin-bottom: 0.3rem;
+}
+
+.x_lms_login_status strong {
+    display: block;
+    color: #1f2a44;
+    font-size: 0.98rem;
+}
+
+.x_lms_login_form_wrap .oe_login_form,
+.x_lms_login_form_wrap .o_user_switch {
+    margin: 0;
+    width: 100%;
+}
+
+.x_lms_login_form_wrap .mb-3 {
+    margin-bottom: 1.15rem !important;
+}
+
+.x_lms_login_form_wrap .form-label,
+.x_lms_login_form_wrap .col-form-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #546274;
+    font-weight: 700;
+    margin-bottom: 0.45rem;
+}
+
+.x_lms_login_form_wrap .form-label a,
+.x_lms_login_form_wrap .col-form-label a,
+.x_lms_login_form_wrap a {
+    color: #72536e;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.x_lms_login_form_wrap .form-control,
+.x_lms_login_form_wrap .input-group .btn {
+    border-radius: 16px;
+}
+
+.x_lms_login_form_wrap .form-control {
+    min-height: 54px;
+    border: 1px solid #d9e2ef;
+    background: #f8fbff;
+    padding: 0.9rem 1rem;
+    box-shadow: none;
+}
+
+.x_lms_login_form_wrap .form-control:focus {
+    border-color: #c3a768;
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(195, 167, 104, 0.16);
+}
+
+.x_lms_login_form_wrap .oe_login_buttons {
+    padding-top: 1rem !important;
+    gap: 0.75rem !important;
+}
+
+.x_lms_login_form_wrap .oe_login_buttons .btn-primary {
+    min-height: 54px;
+    border: 0;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #173153, #7c5d7a);
+    font-size: 1rem;
+    font-weight: 700;
+    box-shadow: 0 18px 34px rgba(23, 49, 83, 0.22);
+}
+
+.x_lms_login_form_wrap .oe_login_buttons .btn-primary:hover,
+.x_lms_login_form_wrap .oe_login_buttons .btn-primary:focus {
+    filter: brightness(1.03);
+}
+
+.x_lms_login_form_wrap .oe_login_buttons .btn-link,
+.x_lms_login_form_wrap .o_user_switch_btn {
+    color: #765774;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.x_lms_login_form_wrap .alert {
+    border: 0;
+    border-radius: 16px;
+    padding: 0.85rem 1rem;
+}
+
+.x_lms_login_form_wrap .alert-danger {
+    background: #fff1f2;
+    color: #9f1239;
+}
+
+.x_lms_login_form_wrap .alert-success {
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.x_lms_login_form_wrap .o_user_switch {
+    padding: 1.1rem;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #f8fbff, #eef3fb);
+    border: 1px solid #dbe4f1;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.x_lms_login_form_wrap .o_user_switch > p {
+    margin: 0;
+    color: #1f2a44;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.x_lms_login_form_wrap .list-group {
+    gap: 0.75rem;
+}
+
+.x_lms_login_form_wrap .list-group-item {
+    border: 0;
+    border-radius: 16px !important;
+    padding: 0.9rem 1rem;
+    background: #ffffff;
+    box-shadow: 0 12px 25px rgba(15, 23, 42, 0.08);
+}
+
+.x_lms_login_form_wrap .o_user_avatar {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+}
+
+.x_lms_login_form_wrap .btn-link.btn-sm.w-100 {
+    margin-top: 0.3rem;
+}
+
+.x_lms_login_meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.8rem 1rem;
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e7edf6;
+    color: #64748b;
+    font-size: 0.92rem;
+    line-height: 1.5;
+}
+
+.x_lms_login_meta a {
+    color: #173153;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+@media (max-width: 1100px) {
+    .x_lms_login_shell {
+        grid-template-columns: 1fr;
+    }
+
+    .x_lms_login_hero {
+        min-height: auto;
+        padding-bottom: 1rem;
+    }
+
+    .x_lms_stat_grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .x_lms_login_hero,
+    .x_lms_login_panel {
+        padding: 1.25rem;
+    }
+
+    .x_lms_hero_inner {
+        transform: translateY(-0.8rem);
+    }
+
+    .x_lms_brand_logo_wrap {
+        width: 72px;
+        height: 72px;
+        border-radius: 20px;
+    }
+
+    .x_lms_brand_logo {
+        width: 58px;
+        height: 58px;
+    }
+
+    .x_lms_login_card {
+        padding: 1.2rem;
+        border-radius: 22px;
+    }
+
+    .x_lms_login_card_header {
+        flex-direction: column;
+    }
+
+    .x_lms_login_card_header h2 {
+        font-size: 1.65rem;
+    }
+
+    .x_lms_login_hero h1 {
+        font-size: 2.35rem;
+    }
+}
+
+
+.x_lms_login_test_accounts {
+    margin-top: 1.2rem;
+    margin-bottom: 1rem;
+    padding: 1rem 1.1rem;
+    border-radius: 18px;
+    background: #f7f9fc;
+    border: 1px solid #dbe3ef;
+}
+
+.x_lms_login_test_accounts_title {
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #334155;
+    margin-bottom: 0.65rem;
+}
+
+.x_lms_login_test_accounts ul {
+    margin: 0;
+    padding-left: 1rem;
+}
+
+.x_lms_login_test_accounts li {
+    margin: 0.35rem 0;
+    color: #475569;
+    line-height: 1.45;
+}
+
+.x_lms_login_test_accounts strong {
+    color: #0f172a;
+}
+

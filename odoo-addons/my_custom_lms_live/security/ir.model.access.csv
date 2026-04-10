@@ -1,0 +1,39 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_lms_course_portal_live,lms.course portal live,my_custom_lms.model_lms_course,base.group_portal,1,0,0,0
+access_lms_lesson_portal_live,lms.lesson portal live,my_custom_lms.model_lms_lesson,base.group_portal,1,0,0,0
+access_lms_announcement_portal_live,lms.announcement portal live,my_custom_lms.model_lms_announcement,base.group_portal,1,0,0,0
+access_lms_enrollment_portal_live,lms.enrollment portal live,my_custom_lms.model_lms_enrollment,base.group_portal,1,0,0,0
+access_lms_quiz_portal_live,lms.quiz portal live,my_custom_lms.model_lms_quiz,base.group_portal,1,0,0,0
+access_lms_question_portal_live,lms.question portal live,my_custom_lms.model_lms_question,base.group_portal,1,0,0,0
+access_lms_quiz_result_portal_live,lms.quiz.result portal live,my_custom_lms.model_lms_quiz_result,base.group_portal,1,0,0,0
+access_lms_quiz_result_line_portal_live,lms.quiz.result.line portal live,my_custom_lms.model_lms_quiz_result_line,base.group_portal,1,0,0,0
+access_lms_lesson_progress_portal_live,lms.lesson.progress portal live,my_custom_lms_live.model_lms_lesson_progress,base.group_portal,1,0,0,0
+access_lms_assignment_portal_live,lms.assignment portal live,my_custom_lms_live.model_lms_assignment,base.group_portal,1,0,0,0
+access_lms_assignment_submission_portal_live,lms.assignment.submission portal live,my_custom_lms_live.model_lms_assignment_submission,base.group_portal,1,1,1,0
+access_lms_attendance_session_portal_live,lms.attendance.session portal live,my_custom_lms_live.model_lms_attendance_session,base.group_portal,1,0,0,0
+access_lms_attendance_record_portal_live,lms.attendance.record portal live,my_custom_lms_live.model_lms_attendance_record,base.group_portal,1,0,0,0
+access_lms_course_student_live,lms.course student live,my_custom_lms.model_lms_course,my_custom_lms.group_lms_student,1,0,0,0
+access_lms_lesson_student_live,lms.lesson student live,my_custom_lms.model_lms_lesson,my_custom_lms.group_lms_student,1,0,0,0
+access_lms_announcement_student_live,lms.announcement student live,my_custom_lms.model_lms_announcement,my_custom_lms.group_lms_student,1,0,0,0
+access_lms_enrollment_student_live,lms.enrollment student live,my_custom_lms.model_lms_enrollment,my_custom_lms.group_lms_student,1,0,0,0
+access_lms_quiz_student_live,lms.quiz student live,my_custom_lms.model_lms_quiz,my_custom_lms.group_lms_student,1,0,0,0
+access_lms_question_student_live,lms.question student live,my_custom_lms.model_lms_question,my_custom_lms.group_lms_student,1,0,0,0
+access_lms_quiz_result_student_live,lms.quiz.result student live,my_custom_lms.model_lms_quiz_result,my_custom_lms.group_lms_student,1,0,0,0
+access_lms_quiz_result_line_student_live,lms.quiz.result.line student live,my_custom_lms.model_lms_quiz_result_line,my_custom_lms.group_lms_student,1,0,0,0
+access_lms_lesson_progress_student_live,lms.lesson.progress student live,my_custom_lms_live.model_lms_lesson_progress,my_custom_lms.group_lms_student,1,0,0,0
+access_lms_assignment_student_live,lms.assignment student live,my_custom_lms_live.model_lms_assignment,my_custom_lms.group_lms_student,1,0,0,0
+access_lms_assignment_submission_student_live,lms.assignment.submission student live,my_custom_lms_live.model_lms_assignment_submission,my_custom_lms.group_lms_student,1,1,1,0
+access_lms_attendance_session_student_live,lms.attendance.session student live,my_custom_lms_live.model_lms_attendance_session,my_custom_lms.group_lms_student,1,0,0,0
+access_lms_attendance_record_student_live,lms.attendance.record student live,my_custom_lms_live.model_lms_attendance_record,my_custom_lms.group_lms_student,1,0,0,0
+
+access_lms_lesson_progress_teacher_live,lms.lesson.progress teacher live,my_custom_lms_live.model_lms_lesson_progress,my_custom_lms.group_lms_teacher,1,1,1,1
+access_lms_assignment_teacher_live,lms.assignment teacher live,my_custom_lms_live.model_lms_assignment,my_custom_lms.group_lms_teacher,1,1,1,1
+access_lms_assignment_submission_teacher_live,lms.assignment.submission teacher live,my_custom_lms_live.model_lms_assignment_submission,my_custom_lms.group_lms_teacher,1,1,1,1
+access_lms_attendance_session_teacher_live,lms.attendance.session teacher live,my_custom_lms_live.model_lms_attendance_session,my_custom_lms.group_lms_teacher,1,1,1,1
+access_lms_attendance_record_teacher_live,lms.attendance.record teacher live,my_custom_lms_live.model_lms_attendance_record,my_custom_lms.group_lms_teacher,1,1,1,1
+
+access_lms_lesson_progress_admin_live,lms.lesson.progress admin live,my_custom_lms_live.model_lms_lesson_progress,my_custom_lms.group_lms_admin,1,1,1,1
+access_lms_assignment_admin_live,lms.assignment admin live,my_custom_lms_live.model_lms_assignment,my_custom_lms.group_lms_admin,1,1,1,1
+access_lms_assignment_submission_admin_live,lms.assignment.submission admin live,my_custom_lms_live.model_lms_assignment_submission,my_custom_lms.group_lms_admin,1,1,1,1
+access_lms_attendance_session_admin_live,lms.attendance.session admin live,my_custom_lms_live.model_lms_attendance_session,my_custom_lms.group_lms_admin,1,1,1,1
+access_lms_attendance_record_admin_live,lms.attendance.record admin live,my_custom_lms_live.model_lms_attendance_record,my_custom_lms.group_lms_admin,1,1,1,1

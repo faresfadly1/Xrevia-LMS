@@ -1,0 +1,2 @@
+name,login,email,password,groups_id/id,share
+Doctor Example,doctor.one@example.com,doctor.one@example.com,Doctor123!,my_custom_lms.group_lms_teacher,False

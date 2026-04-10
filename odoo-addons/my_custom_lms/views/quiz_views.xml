@@ -1,0 +1,139 @@
+<odoo>
+    <record id="view_lms_quiz_tree" model="ir.ui.view">
+        <field name="name">lms.quiz.tree</field>
+        <field name="model">lms.quiz</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="course_id"/>
+                <field name="total_questions"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lms_quiz_form" model="ir.ui.view">
+        <field name="name">lms.quiz.form</field>
+        <field name="model">lms.quiz</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="course_id"/>
+                    </group>
+                    <group>
+                        <field name="question_ids">
+                            <list editable="bottom">
+                                <field name="question_text"/>
+                                <field name="correct_answer"/>
+                                <field name="points"/>
+                            </list>
+                        </field>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lms_question_tree" model="ir.ui.view">
+        <field name="name">lms.question.tree</field>
+        <field name="model">lms.question</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="quiz_id"/>
+                <field name="question_text"/>
+                <field name="correct_answer"/>
+                <field name="points"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lms_question_form" model="ir.ui.view">
+        <field name="name">lms.question.form</field>
+        <field name="model">lms.question</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="quiz_id"/>
+                        <field name="question_text"/>
+                    </group>
+                    <group>
+                        <field name="answer_a"/>
+                        <field name="answer_b"/>
+                        <field name="answer_c"/>
+                        <field name="answer_d"/>
+                        <field name="correct_answer"/>
+                        <field name="points"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lms_quiz_result_tree" model="ir.ui.view">
+        <field name="name">lms.quiz.result.tree</field>
+        <field name="model">lms.quiz.result</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="quiz_id"/>
+                <field name="student_id"/>
+                <field name="score"/>
+                <field name="max_score"/>
+                <field name="percentage"/>
+                <field name="submitted_on"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lms_quiz_result_form" model="ir.ui.view">
+        <field name="name">lms.quiz.result.form</field>
+        <field name="model">lms.quiz.result</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="quiz_id"/>
+                        <field name="student_id"/>
+                        <field name="score"/>
+                        <field name="max_score"/>
+                        <field name="percentage"/>
+                        <field name="passed"/>
+                    </group>
+                    <group>
+                        <field name="line_ids">
+                            <list>
+                                <field name="question_id"/>
+                                <field name="selected_answer"/>
+                                <field name="is_correct"/>
+                                <field name="points"/>
+                            </list>
+                        </field>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_lms_quiz" model="ir.actions.act_window">
+        <field name="name">Quizzes</field>
+        <field name="res_model">lms.quiz</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_lms_question" model="ir.actions.act_window">
+        <field name="name">Questions</field>
+        <field name="res_model">lms.question</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_lms_quiz_result" model="ir.actions.act_window">
+        <field name="name">Quiz Results</field>
+        <field name="res_model">lms.quiz.result</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_lms_quizzes" name="Quizzes" parent="menu_lms_root" action="action_lms_quiz" sequence="50"/>
+    <menuitem id="menu_lms_questions" name="Questions" parent="menu_lms_root" action="action_lms_question" sequence="60"/>
+    <menuitem id="menu_lms_quiz_results" name="Quiz Results" parent="menu_lms_root" action="action_lms_quiz_result" sequence="70"/>
+</odoo>

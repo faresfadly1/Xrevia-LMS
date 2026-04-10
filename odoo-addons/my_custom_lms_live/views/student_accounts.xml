@@ -1,0 +1,146 @@
+<odoo>
+    <record id="view_lms_users_tree" model="ir.ui.view">
+        <field name="name">res.users.lms.tree</field>
+        <field name="model">res.users</field>
+        <field name="arch" type="xml">
+            <list string="LMS Users">
+                <field name="name"/>
+                <field name="login"/>
+                <field name="x_lms_role"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lms_users_form" model="ir.ui.view">
+        <field name="name">res.users.lms.form</field>
+        <field name="model">res.users</field>
+        <field name="arch" type="xml">
+            <form string="LMS User">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="login"/>
+                            <field name="x_lms_role" required="1"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <div class="o_form_label">Use LMS Role to switch the account safely between Admin, Student, and Teacher.</div>
+                            <div class="o_form_label">Admin = full LMS administration, settings, analytics, and permissions.</div>
+                            <div class="o_form_label">Student = learning access for enrolled courses only.</div>
+                            <div class="o_form_label">Teacher = internal access for managing assigned courses.</div>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_lms_users" model="ir.actions.act_window">
+        <field name="name">LMS Users</field>
+        <field name="res_model">res.users</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[("x_lms_role", "in", ["admin", "student", "teacher"]), ("active", "=", True)]</field>
+    </record>
+
+    <record id="action_lms_users_list_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_lms_users_tree"/>
+        <field name="act_window_id" ref="action_lms_users"/>
+    </record>
+
+    <record id="action_lms_users_form_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_lms_users_form"/>
+        <field name="act_window_id" ref="action_lms_users"/>
+    </record>
+
+    <record id="action_lms_students" model="ir.actions.act_window">
+        <field name="name">Students</field>
+        <field name="res_model">res.users</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[("x_lms_role", "=", "student"), ("active", "=", True)]</field>
+        <field name="context">{'default_x_lms_role': 'student'}</field>
+    </record>
+
+    <record id="action_lms_students_list_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_lms_users_tree"/>
+        <field name="act_window_id" ref="action_lms_students"/>
+    </record>
+
+    <record id="action_lms_students_form_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_lms_users_form"/>
+        <field name="act_window_id" ref="action_lms_students"/>
+    </record>
+
+    <record id="action_lms_doctors" model="ir.actions.act_window">
+        <field name="name">Doctors</field>
+        <field name="res_model">res.users</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[("x_lms_role", "=", "teacher"), ("active", "=", True)]</field>
+        <field name="context">{'default_x_lms_role': 'teacher'}</field>
+    </record>
+
+    <record id="action_lms_admins" model="ir.actions.act_window">
+        <field name="name">Admins</field>
+        <field name="res_model">res.users</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[("x_lms_role", "=", "admin"), ("active", "=", True)]</field>
+        <field name="context">{'default_x_lms_role': 'admin'}</field>
+    </record>
+
+    <record id="action_lms_doctors_list_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_lms_users_tree"/>
+        <field name="act_window_id" ref="action_lms_doctors"/>
+    </record>
+
+    <record id="action_lms_doctors_form_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_lms_users_form"/>
+        <field name="act_window_id" ref="action_lms_doctors"/>
+    </record>
+
+    <record id="action_lms_admins_list_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_lms_users_tree"/>
+        <field name="act_window_id" ref="action_lms_admins"/>
+    </record>
+
+    <record id="action_lms_admins_form_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_lms_users_form"/>
+        <field name="act_window_id" ref="action_lms_admins"/>
+    </record>
+
+    <record id="action_lms_students_template" model="ir.actions.act_url">
+        <field name="name">Student Import Template</field>
+        <field name="url">/my_custom_lms_live/static/import_templates/students_template.csv</field>
+        <field name="target">self</field>
+    </record>
+
+    <record id="action_lms_doctors_template" model="ir.actions.act_url">
+        <field name="name">Doctor Import Template</field>
+        <field name="url">/my_custom_lms_live/static/import_templates/doctors_template.csv</field>
+        <field name="target">self</field>
+    </record>
+
+    <menuitem id="menu_lms_people_root" name="People" parent="my_custom_lms.menu_lms_root" sequence="35"/>
+    <menuitem id="menu_lms_users" name="LMS Users" parent="my_custom_lms_live.menu_lms_people_root" action="action_lms_users" sequence="5"/>
+    <menuitem id="menu_lms_admins" name="Admins" parent="my_custom_lms_live.menu_lms_people_root" action="action_lms_admins" sequence="8"/>
+    <menuitem id="menu_lms_students" name="Students" parent="my_custom_lms_live.menu_lms_people_root" action="action_lms_students" sequence="10"/>
+    <menuitem id="menu_lms_doctors" name="Doctors" parent="my_custom_lms_live.menu_lms_people_root" action="action_lms_doctors" sequence="20"/>
+    <menuitem id="menu_lms_students_template" name="Student Import Template" parent="my_custom_lms_live.menu_lms_people_root" action="action_lms_students_template" sequence="30"/>
+    <menuitem id="menu_lms_doctors_template" name="Doctor Import Template" parent="my_custom_lms_live.menu_lms_people_root" action="action_lms_doctors_template" sequence="40"/>
+</odoo>

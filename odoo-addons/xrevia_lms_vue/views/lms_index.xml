@@ -1,0 +1,18 @@
+<odoo>
+  <template id="lms_index" name="Xrevia LMS Vue">
+    <html lang="en">
+      <head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <title>Xrevia LMS</title>
+        <link rel="preconnect" href="https://cdnjs.cloudflare.com"/>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+        <link rel="stylesheet" href="/xrevia_lms_vue/static/xrevia/assets/app.css?v=live14"/>
+      </head>
+      <body class="xrevia-lms-standalone">
+        <div id="app"></div>
+        <script type="module" src="/xrevia_lms_vue/static/xrevia/assets/app.js?v=live14"></script>
+      </body>
+    </html>
+  </template>
+</odoo>

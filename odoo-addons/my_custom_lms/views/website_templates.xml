@@ -1,0 +1,116 @@
+<odoo>
+  <template id="website_courses" name="Xrevia University LMS Home">
+    <t t-call="website.layout">
+      <t t-set="no_header" t-value="True"/>
+      <t t-set="no_footer" t-value="True"/>
+      <t t-set="title">XREVIA University LMS | Student Portal</t>
+
+      <t t-set="head">
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&amp;display=swap" rel="stylesheet"/>
+        <style>
+          * { font-family: 'Inter', sans-serif; }
+          body { background: #f4f7fc; }
+          .transition-smooth { transition: all 0.2s ease; }
+          .card-hover:hover { transform: translateY(-2px); box-shadow: 0 12px 20px -12px rgba(0, 0, 0, 0.15); }
+          .gradient-brand { background: linear-gradient(135deg, #0B2B40 0%, #1A4A5F 100%); }
+          .glass-card { background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(2px); }
+          .nav-active { background-color: #0B2B40; color: white; border-radius: 2rem; }
+          .btn-primary { background: #0B2B40; transition: all 0.2s; }
+          .btn-primary:hover { background: #154e6b; transform: scale(0.98); }
+          .status-badge { padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+          .status-pending { background: #FEF3C7; color: #B45309; }
+          .status-submitted { background: #D1FAE5; color: #065F46; }
+        </style>
+      </t>
+
+      <div class="antialiased">
+
+        <!-- LOGIN SECTION -->
+        <div id="loginContainer" class="min-h-screen flex items-center justify-center p-5">
+          <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
+            <div class="gradient-brand px-6 py-8 text-center">
+              <div class="flex justify-center mb-3">
+                <div class="bg-white/20 backdrop-blur-sm p-3 rounded-full w-20 h-20 flex items-center justify-center">
+                  <img src="/my_custom_lms/static/description/logo.png" alt="Xrevia University" class="h-12"/>
+                </div>
+              </div>
+              <h1 class="text-3xl font-bold text-white tracking-tight">XREVIA</h1>
+              <p class="text-white/80 text-sm mt-1">UNIVERSITY <span class="font-semibold">EST. 2024</span></p>
+              <p class="text-white/70 text-xs mt-3">Student Learning Management System</p>
+            </div>
+            <div class="p-6 md:p-8">
+              <div class="mb-5 text-center">
+                <i class="fas fa-graduation-cap text-4xl text-[#0B2B40] opacity-40"></i>
+              </div>
+              <form id="loginForm">
+                <div class="mb-4">
+                  <label class="block text-gray-700 text-sm font-semibold mb-2"><i class="fas fa-envelope mr-2 text-[#0B2B40]"></i>Student Email</label>
+                  <input type="email" id="loginEmail" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0B2B40] focus:border-transparent" placeholder="student@xrevia.com" required="required"/>
+                </div>
+                <div class="mb-5">
+                  <label class="block text-gray-700 text-sm font-semibold mb-2"><i class="fas fa-lock mr-2 text-[#0B2B40]"></i>Password</label>
+                  <input type="password" id="loginPassword" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0B2B40]" placeholder="••••••••" required="required"/>
+                </div>
+                <div id="loginError" class="text-red-500 text-sm mb-3 text-center hidden">⚠️ Invalid credentials. Use student@xrevia.com / password123</div>
+                <button type="submit" class="w-full btn-primary text-white font-bold py-3 rounded-xl shadow-md transition-smooth">Login to Dashboard <i class="fas fa-arrow-right ml-2"></i></button>
+              </form>
+              <div class="mt-6 text-center text-sm text-gray-500 border-t pt-5">
+                <p class="font-medium">🔐 Demo Credentials</p>
+                <p class="text-xs text-gray-400 mt-1">Email: <span class="font-mono bg-gray-100 px-1 rounded">student@xrevia.com</span> &#160;|&#160; Password: <span class="font-mono bg-gray-100 px-1 rounded">password123</span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MAIN APP -->
+        <div id="appContainer" class="hidden min-h-screen bg-gray-50">
+          <header class="gradient-brand shadow-md sticky top-0 z-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="bg-white/20 rounded-full w-10 h-10 flex items-center justify-center">
+                  <img src="/my_custom_lms/static/description/logo.png" alt="Xrevia University" class="h-6"/>
+                </div>
+                <div>
+                  <h1 class="text-white font-bold text-xl tracking-tight">XREVIA UNIVERSITY</h1>
+                  <p class="text-white/70 text-[11px] -mt-1">LMS | Student Portal</p>
+                </div>
+              </div>
+              <div class="flex items-center space-x-3 mt-2 sm:mt-0">
+                <div class="flex items-center space-x-2 bg-white/10 rounded-full px-3 py-1.5">
+                  <i class="fas fa-user-circle text-white text-lg"></i>
+                  <span id="studentNameDisplay" class="text-white text-sm font-medium">Emma Watson</span>
+                </div>
+                <button id="logoutBtn" class="bg-white/20 hover:bg-white/30 text-white px-4 py-1.5 rounded-full text-sm font-semibold transition"><i class="fas fa-sign-out-alt mr-1"></i> Logout</button>
+              </div>
+            </div>
+            <div class="bg-[#0a2533] border-b border-white/10">
+              <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <nav class="flex flex-wrap gap-1 sm:gap-2 py-2 overflow-x-auto">
+                  <button data-nav="dashboard" class="nav-tab px-5 py-2 text-sm font-medium rounded-full transition-smooth text-white/80 hover:bg-white/10 flex items-center gap-2"><i class="fas fa-tachometer-alt"></i> Dashboard</button>
+                  <button data-nav="courses" class="nav-tab px-5 py-2 text-sm font-medium rounded-full transition-smooth text-white/80 hover:bg-white/10 flex items-center gap-2"><i class="fas fa-book-open"></i> My Courses</button>
+                  <button data-nav="assignments" class="nav-tab px-5 py-2 text-sm font-medium rounded-full transition-smooth text-white/80 hover:bg-white/10 flex items-center gap-2"><i class="fas fa-tasks"></i> Assignments</button>
+                  <button data-nav="grades" class="nav-tab px-5 py-2 text-sm font-medium rounded-full transition-smooth text-white/80 hover:bg-white/10 flex items-center gap-2"><i class="fas fa-chart-line"></i> Grades</button>
+                </nav>
+              </div>
+            </div>
+          </header>
+
+          <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div id="dashboardView" class="view-section"></div>
+            <div id="coursesView" class="view-section hidden"></div>
+            <div id="assignmentsView" class="view-section hidden"></div>
+            <div id="gradesView" class="view-section hidden"></div>
+          </main>
+        </div>
+
+        <script><![CDATA[
+          // YOUR FULL JS FROM ORIGINAL MESSAGE (UNCHANGED)
+          // ... keep as-is here (the full script you pasted earlier)
+        ]]></script>
+      </div>
+      <script src="/my_custom_lms/static/src/js/xrevia_portal.js"></script>
+    </t>
+  </template>
+</odoo>

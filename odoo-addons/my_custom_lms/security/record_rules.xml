@@ -1,0 +1,152 @@
+<odoo>
+    <!-- Teacher access limited to their own courses and related records -->
+    <record id="rule_lms_teacher_course" model="ir.rule">
+        <field name="name">LMS Teacher: Own Courses</field>
+        <field name="model_id" ref="model_lms_course"/>
+        <field name="groups" eval="[(4, ref('my_custom_lms.group_lms_teacher'))]"/>
+        <field name="domain_force">[('teacher_id', '=', user.id)]</field>
+    </record>
+    <record id="rule_lms_teacher_lesson" model="ir.rule">
+        <field name="name">LMS Teacher: Own Lessons</field>
+        <field name="model_id" ref="model_lms_lesson"/>
+        <field name="groups" eval="[(4, ref('my_custom_lms.group_lms_teacher'))]"/>
+        <field name="domain_force">[('course_id.teacher_id', '=', user.id)]</field>
+    </record>
+    <record id="rule_lms_teacher_announcement" model="ir.rule">
+        <field name="name">LMS Teacher: Own Announcements</field>
+        <field name="model_id" ref="model_lms_announcement"/>
+        <field name="groups" eval="[(4, ref('my_custom_lms.group_lms_teacher'))]"/>
+        <field name="domain_force">[('course_id.teacher_id', '=', user.id)]</field>
+    </record>
+    <record id="rule_lms_teacher_enrollment" model="ir.rule">
+        <field name="name">LMS Teacher: Own Enrollments</field>
+        <field name="model_id" ref="model_lms_enrollment"/>
+        <field name="groups" eval="[(4, ref('my_custom_lms.group_lms_teacher'))]"/>
+        <field name="domain_force">[('course_id.teacher_id', '=', user.id)]</field>
+    </record>
+    <record id="rule_lms_teacher_quiz" model="ir.rule">
+        <field name="name">LMS Teacher: Own Quizzes</field>
+        <field name="model_id" ref="model_lms_quiz"/>
+        <field name="groups" eval="[(4, ref('my_custom_lms.group_lms_teacher'))]"/>
+        <field name="domain_force">[('course_id.teacher_id', '=', user.id)]</field>
+    </record>
+    <record id="rule_lms_teacher_question" model="ir.rule">
+        <field name="name">LMS Teacher: Own Questions</field>
+        <field name="model_id" ref="model_lms_question"/>
+        <field name="groups" eval="[(4, ref('my_custom_lms.group_lms_teacher'))]"/>
+        <field name="domain_force">[('quiz_id.course_id.teacher_id', '=', user.id)]</field>
+    </record>
+    <record id="rule_lms_teacher_result" model="ir.rule">
+        <field name="name">LMS Teacher: Own Results</field>
+        <field name="model_id" ref="model_lms_quiz_result"/>
+        <field name="groups" eval="[(4, ref('my_custom_lms.group_lms_teacher'))]"/>
+        <field name="domain_force">[('quiz_id.course_id.teacher_id', '=', user.id)]</field>
+    </record>
+    <record id="rule_lms_teacher_result_line" model="ir.rule">
+        <field name="name">LMS Teacher: Own Result Lines</field>
+        <field name="model_id" ref="model_lms_quiz_result_line"/>
+        <field name="groups" eval="[(4, ref('my_custom_lms.group_lms_teacher'))]"/>
+        <field name="domain_force">[('result_id.quiz_id.course_id.teacher_id', '=', user.id)]</field>
+    </record>
+
+    <!-- Student access -->
+    <record id="rule_lms_student_course" model="ir.rule">
+        <field name="name">LMS Student: Course</field>
+        <field name="model_id" ref="model_lms_course"/>
+        <field name="groups" eval="[(4, ref('my_custom_lms.group_lms_student'))]"/>
+        <field name="domain_force">[('enrollment_ids.student_id', '=', user.id)]</field>
+    </record>
+    <record id="rule_lms_student_lesson" model="ir.rule">
+        <field name="name">LMS Student: Lesson</field>
+        <field name="model_id" ref="model_lms_lesson"/>
+        <field name="groups" eval="[(4, ref('my_custom_lms.group_lms_student'))]"/>
+        <field name="domain_force">[('course_id.enrollment_ids.student_id', '=', user.id)]</field>
+    </record>
+    <record id="rule_lms_student_announcement" model="ir.rule">
+        <field name="name">LMS Student: Announcement</field>
+        <field name="model_id" ref="model_lms_announcement"/>
+        <field name="groups" eval="[(4, ref('my_custom_lms.group_lms_student'))]"/>
+        <field name="domain_force">[('course_id.enrollment_ids.student_id', '=', user.id)]</field>
+    </record>
+    <record id="rule_lms_student_quiz" model="ir.rule">
+        <field name="name">LMS Student: Quiz</field>
+        <field name="model_id" ref="model_lms_quiz"/>
+        <field name="groups" eval="[(4, ref('my_custom_lms.group_lms_student'))]"/>
+        <field name="domain_force">[('course_id.enrollment_ids.student_id', '=', user.id)]</field>
+    </record>
+    <record id="rule_lms_student_question" model="ir.rule">
+        <field name="name">LMS Student: Question</field>
+        <field name="model_id" ref="model_lms_question"/>
+        <field name="groups" eval="[(4, ref('my_custom_lms.group_lms_student'))]"/>
+        <field name="domain_force">[('quiz_id.course_id.enrollment_ids.student_id', '=', user.id)]</field>
+    </record>
+    <record id="rule_lms_student_enrollment" model="ir.rule">
+        <field name="name">LMS Student: Enrollment</field>
+        <field name="model_id" ref="model_lms_enrollment"/>
+        <field name="groups" eval="[(4, ref('my_custom_lms.group_lms_student'))]"/>
+        <field name="domain_force">[('student_id', '=', user.id)]</field>
+    </record>
+    <record id="rule_lms_student_result" model="ir.rule">
+        <field name="name">LMS Student: Result</field>
+        <field name="model_id" ref="model_lms_quiz_result"/>
+        <field name="groups" eval="[(4, ref('my_custom_lms.group_lms_student'))]"/>
+        <field name="domain_force">[('student_id', '=', user.id)]</field>
+    </record>
+    <record id="rule_lms_student_result_line" model="ir.rule">
+        <field name="name">LMS Student: Result Line</field>
+        <field name="model_id" ref="model_lms_quiz_result_line"/>
+        <field name="groups" eval="[(4, ref('my_custom_lms.group_lms_student'))]"/>
+        <field name="domain_force">[('result_id.student_id', '=', user.id)]</field>
+    </record>
+
+    <!-- LMS admins can access every LMS record -->
+    <record id="rule_lms_admin_course_all" model="ir.rule">
+        <field name="name">LMS Admin: All Courses</field>
+        <field name="model_id" ref="model_lms_course"/>
+        <field name="groups" eval="[(4, ref('my_custom_lms.group_lms_admin'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+    <record id="rule_lms_admin_lesson_all" model="ir.rule">
+        <field name="name">LMS Admin: All Lessons</field>
+        <field name="model_id" ref="model_lms_lesson"/>
+        <field name="groups" eval="[(4, ref('my_custom_lms.group_lms_admin'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+    <record id="rule_lms_admin_announcement_all" model="ir.rule">
+        <field name="name">LMS Admin: All Announcements</field>
+        <field name="model_id" ref="model_lms_announcement"/>
+        <field name="groups" eval="[(4, ref('my_custom_lms.group_lms_admin'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+    <record id="rule_lms_admin_enrollment_all" model="ir.rule">
+        <field name="name">LMS Admin: All Enrollments</field>
+        <field name="model_id" ref="model_lms_enrollment"/>
+        <field name="groups" eval="[(4, ref('my_custom_lms.group_lms_admin'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+    <record id="rule_lms_admin_quiz_all" model="ir.rule">
+        <field name="name">LMS Admin: All Quizzes</field>
+        <field name="model_id" ref="model_lms_quiz"/>
+        <field name="groups" eval="[(4, ref('my_custom_lms.group_lms_admin'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+    <record id="rule_lms_admin_question_all" model="ir.rule">
+        <field name="name">LMS Admin: All Questions</field>
+        <field name="model_id" ref="model_lms_question"/>
+        <field name="groups" eval="[(4, ref('my_custom_lms.group_lms_admin'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+    <record id="rule_lms_admin_result_all" model="ir.rule">
+        <field name="name">LMS Admin: All Results</field>
+        <field name="model_id" ref="model_lms_quiz_result"/>
+        <field name="groups" eval="[(4, ref('my_custom_lms.group_lms_admin'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+    <record id="rule_lms_admin_result_line_all" model="ir.rule">
+        <field name="name">LMS Admin: All Result Lines</field>
+        <field name="model_id" ref="model_lms_quiz_result_line"/>
+        <field name="groups" eval="[(4, ref('my_custom_lms.group_lms_admin'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+</odoo>

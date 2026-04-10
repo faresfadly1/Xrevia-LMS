@@ -1,0 +1,2 @@
+name,login,email,password,groups_id/id,share
+Student Example,student.one@example.com,student.one@example.com,Student123!,base.group_portal,True

@@ -1,0 +1,178 @@
+<odoo>
+    <record id="view_lms_course_tree_live_analytics" model="ir.ui.view">
+        <field name="name">lms.course.tree.live.analytics</field>
+        <field name="model">lms.course</field>
+        <field name="inherit_id" ref="my_custom_lms.view_lms_course_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='enrolled_count']" position="after">
+                <field name="x_total_lessons"/>
+                <field name="x_total_quizzes"/>
+                <field name="x_active_student_count"/>
+                <field name="x_average_progress" string="Avg Progress"/>
+                <field name="x_average_percentage" string="Avg Grade"/>
+                <field name="x_attendance_rate"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_lms_course_form_live_analytics" model="ir.ui.view">
+        <field name="name">lms.course.form.live.analytics</field>
+        <field name="model">lms.course</field>
+        <field name="inherit_id" ref="my_custom_lms.view_lms_course_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/notebook" position="before">
+                <group string="Live Overview" col="4">
+                    <field name="x_total_lessons" readonly="1"/>
+                    <field name="x_total_announcements" readonly="1"/>
+                    <field name="x_total_quizzes" readonly="1"/>
+                    <field name="x_quiz_attempt_count" readonly="1"/>
+                    <field name="x_active_student_count" readonly="1"/>
+                    <field name="x_average_progress" readonly="1"/>
+                    <field name="x_average_percentage" readonly="1"/>
+                    <field name="x_attendance_rate" readonly="1"/>
+                    <field name="x_completion_rate" readonly="1"/>
+                </group>
+            </xpath>
+            <xpath expr="//page[field[@name='enrollment_ids']]/field[@name='enrollment_ids']/list/field[@name='progress']" position="after">
+                <field name="x_completed_lessons" readonly="1"/>
+                <field name="x_total_lessons" readonly="1"/>
+                <field name="x_last_activity_on" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_lms_lesson_tree_live_media" model="ir.ui.view">
+        <field name="name">lms.lesson.tree.live.media</field>
+        <field name="model">lms.lesson</field>
+        <field name="inherit_id" ref="my_custom_lms.view_lms_lesson_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='video_url']" position="after">
+                <field name="file_filename" string="Attachment"/>
+                <field name="x_started_student_count"/>
+                <field name="x_completed_student_count"/>
+                <field name="x_completion_rate"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_lms_lesson_form_live_media" model="ir.ui.view">
+        <field name="name">lms.lesson.form.live.media</field>
+        <field name="model">lms.lesson</field>
+        <field name="inherit_id" ref="my_custom_lms.view_lms_lesson_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/group[2]" position="after">
+                <group string="Attendance Snapshot" col="3">
+                    <field name="x_started_student_count" readonly="1"/>
+                    <field name="x_completed_student_count" readonly="1"/>
+                    <field name="x_completion_rate" readonly="1"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_lms_quiz_tree_live_rules" model="ir.ui.view">
+        <field name="name">lms.quiz.tree.live.rules</field>
+        <field name="model">lms.quiz</field>
+        <field name="inherit_id" ref="my_custom_lms.view_lms_quiz_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='total_questions']" position="after">
+                <field name="x_attempt_limit"/>
+                <field name="x_deadline"/>
+                <field name="x_attempt_count"/>
+                <field name="x_average_percentage" string="Avg Grade"/>
+                <field name="x_pass_rate"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_lms_quiz_form_live_rules" model="ir.ui.view">
+        <field name="name">lms.quiz.form.live.rules</field>
+        <field name="model">lms.quiz</field>
+        <field name="inherit_id" ref="my_custom_lms.view_lms_quiz_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/group[1]" position="after">
+                <group string="Student Access" col="2">
+                    <field name="x_attempt_limit"/>
+                    <field name="x_deadline"/>
+                </group>
+                <group string="Performance Snapshot" col="2">
+                    <field name="x_attempt_count" readonly="1"/>
+                    <field name="x_unique_student_count" readonly="1"/>
+                    <field name="x_average_percentage" readonly="1"/>
+                    <field name="x_pass_rate" readonly="1"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_lms_quiz_result_search_live" model="ir.ui.view">
+        <field name="name">lms.quiz.result.search.live</field>
+        <field name="model">lms.quiz.result</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="course_id"/>
+                <field name="quiz_id"/>
+                <field name="student_id"/>
+                <field name="submitted_on"/>
+                <filter name="passed" string="Passed" domain="[('passed', '=', True)]"/>
+                <filter name="failed" string="Needs Attention" domain="[('passed', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_course" string="Course" context="{'group_by': 'course_id'}"/>
+                    <filter name="group_quiz" string="Quiz" context="{'group_by': 'quiz_id'}"/>
+                    <filter name="group_student" string="Student" context="{'group_by': 'student_id'}"/>
+                    <filter name="group_day" string="Submission Day" context="{'group_by': 'submitted_on:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_lms_quiz_result_pivot_live" model="ir.ui.view">
+        <field name="name">lms.quiz.result.pivot.live</field>
+        <field name="model">lms.quiz.result</field>
+        <field name="arch" type="xml">
+            <pivot string="Grade Analytics">
+                <field name="course_id" type="row"/>
+                <field name="quiz_id" type="col"/>
+                <field name="percentage" type="measure"/>
+                <field name="score" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_lms_quiz_result_graph_live" model="ir.ui.view">
+        <field name="name">lms.quiz.result.graph.live</field>
+        <field name="model">lms.quiz.result</field>
+        <field name="arch" type="xml">
+            <graph string="Grade Analytics" type="bar">
+                <field name="course_id"/>
+                <field name="percentage" type="measure"/>
+                <field name="quiz_id"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_lms_grade_analytics" model="ir.actions.act_window">
+        <field name="name">Grade Analytics</field>
+        <field name="res_model">lms.quiz.result</field>
+        <field name="view_mode">pivot,graph,list,form</field>
+        <field name="search_view_id" ref="my_custom_lms_live.view_lms_quiz_result_search_live"/>
+        <field name="context">{'group_by': 'course_id'}</field>
+    </record>
+
+    <menuitem id="menu_lms_grade_analytics" name="Analytics" parent="my_custom_lms.menu_lms_root" action="my_custom_lms_live.action_lms_grade_analytics" sequence="75"/>
+
+    <record id="view_lms_course_form_live_announcements" model="ir.ui.view">
+        <field name="name">lms.course.form.live.announcements</field>
+        <field name="model">lms.course</field>
+        <field name="inherit_id" ref="my_custom_lms.view_lms_course_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[field[@name='announcement_ids']]/field[@name='announcement_ids']/list/field[@name='title']" position="after">
+                <field name="message"/>
+            </xpath>
+            <xpath expr="//page[field[@name='announcement_ids']]/field[@name='announcement_ids']/list/field[@name='date']" position="attributes">
+                <attribute name="optional">show</attribute>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
