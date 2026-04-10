@@ -101,9 +101,10 @@
       <main class="reference-surface">
         <div v-if="store.error" class="reference-alert">{{ store.error }}</div>
         <div v-else-if="store.loading" class="reference-alert reference-alert--info">Loading your university workspace...</div>
+        <div v-if="isDemoMode && !store.error && !store.loading" class="reference-alert reference-alert--info">Demo mode is active. Use the shield icon in the top bar to switch between Student, Teacher, and Admin views.</div>
 
         <StudentDashboard
-          v-else-if="activeNavItem?.kind === 'dashboard' && currentRole === 'student'"
+          v-if="!store.error && !store.loading && activeNavItem?.kind === 'dashboard' && currentRole === 'student'"
           :greeting="`Good morning, ${firstName}!`"
           subtitle="Keep your coursework, deadlines, and progress beautifully organized from one clear academic dashboard."
           :stats="studentDashboardStats"
@@ -671,6 +672,7 @@ const accountForm = ref({ fullName: "", email: "", phone: "" });
 const notificationForm = ref({ announcements: true, quizzes: true, progress: true });
 const passwordForm = ref({ currentPassword: "", newPassword: "", confirmPassword: "" });
 const activeNavKey = ref("dashboard");
+const isDemoMode = computed(() => store.environmentMode === "demo");
 
 const notificationOptions = [
   {
@@ -850,11 +852,17 @@ const searchPlaceholder = computed(() => {
 });
 
 const topbarActions = computed(() => {
-  const utilityActions = [
-    { key: "theme", icon: themeMode.value === "dark" ? "fas fa-sun" : "far fa-moon", action: "toggle-theme" },
-    { key: "backend", icon: "fas fa-th-large", action: "backend" },
-    { key: "settings", icon: "fas fa-cog", action: "backend-settings" },
-  ];
+  const utilityActions = isDemoMode.value
+    ? [
+        { key: "theme", icon: themeMode.value === "dark" ? "fas fa-sun" : "far fa-moon", action: "toggle-theme" },
+        { key: "role-switch", icon: "fas fa-user-shield", action: "cycle-role" },
+        { key: "workspace-settings", icon: "fas fa-cog", action: currentRole.value === "admin" ? "settings" : "account" },
+      ]
+    : [
+        { key: "theme", icon: themeMode.value === "dark" ? "fas fa-sun" : "far fa-moon", action: "toggle-theme" },
+        { key: "backend", icon: "fas fa-th-large", action: "backend" },
+        { key: "settings", icon: "fas fa-cog", action: "backend-settings" },
+      ];
 
   if (currentRole.value === "admin") {
     return [
@@ -1472,19 +1480,19 @@ const helpTiles = computed(() => [
 
 const adminSettingsTiles = computed(() => [
   {
-    title: "Open Odoo Settings",
-    description: "Jump into full administrative configuration when you need backend control.",
-    copy: "Use the native admin console for technical settings and platform-wide changes.",
+    title: isDemoMode.value ? "Open Settings Workspace" : "Open Odoo Settings",
+    description: isDemoMode.value ? "Manage the demo LMS settings view directly inside this dashboard." : "Jump into full administrative configuration when you need backend control.",
+    copy: isDemoMode.value ? "The GitHub Pages version stays fully self-contained, so settings open inside the demo workspace." : "Use the native admin console for technical settings and platform-wide changes.",
     cta: "Open settings",
-    action: { type: "url", url: "/odoo/settings#xrevia_lms" },
+    action: isDemoMode.value ? { type: "navigate", key: "settings" } : { type: "url", url: "/odoo/settings#xrevia_lms" },
     icon: "fas fa-sliders-h",
   },
   {
-    title: "Open Backend Dashboard",
-    description: "Continue deeper operational work in the backend app switcher.",
-    copy: "User management, reports, and advanced administration remain available there.",
-    cta: "Open backend",
-    action: { type: "url", url: "/odoo" },
+    title: isDemoMode.value ? "Review User Directory" : "Open Backend Dashboard",
+    description: isDemoMode.value ? "Browse the demo user, student, and professor directories without leaving the static site." : "Continue deeper operational work in the backend app switcher.",
+    copy: isDemoMode.value ? "This keeps the public demo working even without a live Odoo backend behind it." : "User management, reports, and advanced administration remain available there.",
+    cta: isDemoMode.value ? "Open users" : "Open backend",
+    action: isDemoMode.value ? { type: "navigate", key: "users" } : { type: "url", url: "/odoo" },
     icon: "fas fa-th-large",
   },
 ]);
@@ -1787,9 +1795,16 @@ const navigateTo = (key) => {
   }
 };
 
-const handleTopbarAction = (action) => {
+const handleTopbarAction = async (action) => {
   if (action.action === "toggle-theme") {
     themeMode.value = themeMode.value === "dark" ? "light" : "dark";
+    return;
+  }
+  if (action.action === "cycle-role") {
+    await store.cycleDemoRole();
+    activeNavKey.value = "dashboard";
+    selectedCourseId.value = null;
+    selectedQuizId.value = null;
     return;
   }
   if (action.action === "backend") {
@@ -2108,6 +2123,14 @@ const savePasswordChange = async () => {
 };
 
 const logoutNow = () => {
+  if (isDemoMode.value) {
+    searchQuery.value = "";
+    activeNavKey.value = "dashboard";
+    selectedCourseId.value = null;
+    selectedQuizId.value = null;
+    void store.setDemoRole("student");
+    return;
+  }
   window.location.href = "/web/session/logout?redirect=/web/login";
 };
 

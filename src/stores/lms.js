@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { buildDemoPayload, cycleStoredDemoRole, demoApi, getStoredDemoRole, isDemoEnvironment, setStoredDemoRole } from "../demoData";
 
 const relName = (value) => (Array.isArray(value) ? value[1] : value);
 const relId = (value) => (Array.isArray(value) ? value[0] : value);
@@ -396,7 +397,7 @@ const mapPayloadToStore = (store, payload, fallbackName = "Student") => {
         content: row.content || "",
         preview: stripHtml(row.content || ""),
         fileName: row.file_filename || "",
-        downloadUrl: row.file_filename ? `/web/content/lms.lesson/${row.id}/file?download=1` : "",
+        downloadUrl: row.file_url || row.fileUrl || (row.file_filename ? `/web/content/lms.lesson/${row.id}/file?download=1` : ""),
         hasAttachment: Boolean(row.file_filename),
         status: progress.status,
         statusLabel: LESSON_STATUS_LABELS[progress.status] || "Not started",
@@ -546,7 +547,7 @@ const mapPayloadToStore = (store, payload, fallbackName = "Student") => {
       percentage: toNumber(row.percentage),
       feedback: row.feedback || "",
       submittedFileName: row.submitted_filename || "",
-      submittedFileUrl: row.submitted_filename ? `/web/content/lms.assignment.submission/${row.id}/submitted_file?download=1` : "",
+      submittedFileUrl: row.submitted_file_url || row.submittedFileUrl || (row.submitted_filename ? `/web/content/lms.assignment.submission/${row.id}/submitted_file?download=1` : ""),
       updatedOn: row.write_date || row.create_date || "",
     }))
     .sort((left, right) => toTimestamp(right.submittedOn || right.updatedOn) - toTimestamp(left.submittedOn || left.updatedOn) || right.id - left.id);
@@ -588,7 +589,7 @@ const mapPayloadToStore = (store, payload, fallbackName = "Student") => {
         weight: toNumber(row.weight) || 1,
         isPublished: row.is_published !== false,
         resourceFileName: row.resource_filename || "",
-        resourceUrl: row.resource_filename ? `/web/content/lms.assignment/${assignmentId}/resource_file?download=1` : "",
+        resourceUrl: row.resource_url || row.resourceUrl || (row.resource_filename ? `/web/content/lms.assignment/${assignmentId}/resource_file?download=1` : ""),
         submissionCount: toNumber(row.submission_count) || submissions.length,
         gradedCount: toNumber(row.graded_count) || submissions.filter((submission) => submission.status === "graded").length,
         pendingCount: toNumber(row.pending_count) || submissions.filter((submission) => ["submitted", "late"].includes(submission.status)).length,
@@ -803,6 +804,8 @@ export const useLmsStore = defineStore("lms", {
       },
     },
     viewerMode: "student",
+    environmentMode: isDemoEnvironment() ? "demo" : "odoo",
+    demoRole: getStoredDemoRole(),
     courses: [],
     lessons: [],
     lessonProgress: [],
@@ -844,11 +847,47 @@ export const useLmsStore = defineStore("lms", {
     ],
   }),
   actions: {
+    refreshDemo() {
+      const payload = buildDemoPayload(this.demoRole);
+      mapPayloadToStore(this, payload, payload?.student?.name || this.student.fullName);
+      return payload;
+    },
+
+    async setDemoRole(role) {
+      if (this.environmentMode !== "demo") return this.viewerMode;
+      this.demoRole = setStoredDemoRole(role);
+      this.activePage = "dashboard";
+      this.error = null;
+      this.refreshDemo();
+      return this.viewerMode;
+    },
+
+    async cycleDemoRole() {
+      if (this.environmentMode !== "demo") return this.viewerMode;
+      this.demoRole = cycleStoredDemoRole(this.demoRole);
+      this.activePage = "dashboard";
+      this.error = null;
+      this.refreshDemo();
+      return this.viewerMode;
+    },
+
+    runDemoMutation(callback, reload = true) {
+      const result = callback();
+      if (reload) {
+        this.refreshDemo();
+      }
+      return result;
+    },
+
     async load() {
       this.loading = true;
       this.error = null;
 
       try {
+        if (this.environmentMode === "demo") {
+          this.refreshDemo();
+          return;
+        }
         const bootstrapResponse = await fetch("/lms/api/live_bootstrap", {
           credentials: "same-origin",
         });
@@ -1016,6 +1055,9 @@ export const useLmsStore = defineStore("lms", {
     },
 
     async trackLesson(lessonId, action = "open", progressPercent = null) {
+      if (this.environmentMode === "demo") {
+        return this.runDemoMutation(() => demoApi.trackLesson(this.demoRole, lessonId, action, progressPercent));
+      }
       const payload = await routeJson("/lms/api/track_lesson", {
         lesson_id: lessonId,
         action,
@@ -1026,6 +1068,9 @@ export const useLmsStore = defineStore("lms", {
     },
 
     async updateProfile(profile) {
+      if (this.environmentMode === "demo") {
+        return this.runDemoMutation(() => demoApi.updateProfile(this.demoRole, profile));
+      }
       const payload = await routeJson("/lms/api/update_profile", {
         full_name: profile.fullName,
         email: profile.email,
@@ -1051,6 +1096,9 @@ export const useLmsStore = defineStore("lms", {
     },
 
     async updateAvatar(imageBase64, clear = false) {
+      if (this.environmentMode === "demo") {
+        return this.runDemoMutation(() => demoApi.updateAvatar(this.demoRole, imageBase64, clear));
+      }
       const payload = await routeJson("/lms/api/update_avatar", {
         image_base64: imageBase64,
         clear,
@@ -1074,6 +1122,9 @@ export const useLmsStore = defineStore("lms", {
     },
 
     async changePassword(currentPassword, newPassword) {
+      if (this.environmentMode === "demo") {
+        return this.runDemoMutation(() => demoApi.changePassword(this.demoRole, currentPassword, newPassword));
+      }
       return routeJson("/lms/api/change_password", {
         current_password: currentPassword,
         new_password: newPassword,
@@ -1081,81 +1132,114 @@ export const useLmsStore = defineStore("lms", {
     },
 
     async saveCourse(courseId, values) {
+      if (this.environmentMode === "demo") {
+        return this.runDemoMutation(() => demoApi.saveCourse(this.demoRole, courseId, values));
+      }
       await rpc("lms.course", "write", [[courseId], values]);
       await this.load();
     },
-
     async createLesson(values) {
+      if (this.environmentMode === "demo") {
+        return this.runDemoMutation(() => demoApi.createLesson(this.demoRole, values));
+      }
       await rpc("lms.lesson", "create", [values]);
       await this.load();
     },
-
     async updateLesson(lessonId, values) {
+      if (this.environmentMode === "demo") {
+        return this.runDemoMutation(() => demoApi.updateLesson(this.demoRole, lessonId, values));
+      }
       await rpc("lms.lesson", "write", [[lessonId], values]);
       await this.load();
     },
-
     async deleteLesson(lessonId) {
+      if (this.environmentMode === "demo") {
+        return this.runDemoMutation(() => demoApi.deleteLesson(this.demoRole, lessonId));
+      }
       await rpc("lms.lesson", "unlink", [[lessonId]]);
       await this.load();
     },
-
     async createAnnouncement(values) {
+      if (this.environmentMode === "demo") {
+        return this.runDemoMutation(() => demoApi.createAnnouncement(this.demoRole, values));
+      }
       await rpc("lms.announcement", "create", [values]);
       await this.load();
     },
-
     async updateAnnouncement(announcementId, values) {
+      if (this.environmentMode === "demo") {
+        return this.runDemoMutation(() => demoApi.updateAnnouncement(this.demoRole, announcementId, values));
+      }
       await rpc("lms.announcement", "write", [[announcementId], values]);
       await this.load();
     },
-
     async deleteAnnouncement(announcementId) {
+      if (this.environmentMode === "demo") {
+        return this.runDemoMutation(() => demoApi.deleteAnnouncement(this.demoRole, announcementId));
+      }
       await rpc("lms.announcement", "unlink", [[announcementId]]);
       await this.load();
     },
-
     async createQuiz(values) {
+      if (this.environmentMode === "demo") {
+        return this.runDemoMutation(() => demoApi.createQuiz(this.demoRole, values));
+      }
       await rpc("lms.quiz", "create", [values]);
       await this.load();
     },
-
     async updateQuiz(quizId, values) {
+      if (this.environmentMode === "demo") {
+        return this.runDemoMutation(() => demoApi.updateQuiz(this.demoRole, quizId, values));
+      }
       await rpc("lms.quiz", "write", [[quizId], values]);
       await this.load();
     },
-
     async deleteQuiz(quizId) {
+      if (this.environmentMode === "demo") {
+        return this.runDemoMutation(() => demoApi.deleteQuiz(this.demoRole, quizId));
+      }
       await rpc("lms.quiz", "unlink", [[quizId]]);
       await this.load();
     },
-
     async createQuestion(values) {
+      if (this.environmentMode === "demo") {
+        return this.runDemoMutation(() => demoApi.createQuestion(this.demoRole, values));
+      }
       await rpc("lms.question", "create", [values]);
       await this.load();
     },
-
     async updateQuestion(questionId, values) {
+      if (this.environmentMode === "demo") {
+        return this.runDemoMutation(() => demoApi.updateQuestion(this.demoRole, questionId, values));
+      }
       await rpc("lms.question", "write", [[questionId], values]);
       await this.load();
     },
-
     async deleteQuestion(questionId) {
+      if (this.environmentMode === "demo") {
+        return this.runDemoMutation(() => demoApi.deleteQuestion(this.demoRole, questionId));
+      }
       await rpc("lms.question", "unlink", [[questionId]]);
       await this.load();
     },
-
     async createEnrollment(values) {
+      if (this.environmentMode === "demo") {
+        return this.runDemoMutation(() => demoApi.createEnrollment(this.demoRole, values));
+      }
       await rpc("lms.enrollment", "create", [values]);
       await this.load();
     },
-
     async deleteEnrollment(enrollmentId) {
+      if (this.environmentMode === "demo") {
+        return this.runDemoMutation(() => demoApi.deleteEnrollment(this.demoRole, enrollmentId));
+      }
       await rpc("lms.enrollment", "unlink", [[enrollmentId]]);
       await this.load();
     },
-
     async saveAssignment(courseId, values, assignmentId = null) {
+      if (this.environmentMode === "demo") {
+        return this.runDemoMutation(() => demoApi.saveAssignment(this.demoRole, courseId, values, assignmentId));
+      }
       const payload = await routeJson("/lms/api/doctor/save_assignment", {
         course_id: courseId,
         assignment_id: assignmentId,
@@ -1166,11 +1250,16 @@ export const useLmsStore = defineStore("lms", {
     },
 
     async deleteAssignment(assignmentId) {
+      if (this.environmentMode === "demo") {
+        return this.runDemoMutation(() => demoApi.deleteAssignment(this.demoRole, assignmentId));
+      }
       await rpc("lms.assignment", "unlink", [[assignmentId]]);
       await this.load();
     },
-
     async submitAssignment(assignmentId, submission) {
+      if (this.environmentMode === "demo") {
+        return this.runDemoMutation(() => demoApi.submitAssignment(this.demoRole, assignmentId, submission));
+      }
       const payload = await routeJson("/lms/api/submit_assignment", {
         assignment_id: assignmentId,
         submission_text: submission.submissionText || "",
@@ -1182,6 +1271,9 @@ export const useLmsStore = defineStore("lms", {
     },
 
     async gradeAssignment(submissionId, values) {
+      if (this.environmentMode === "demo") {
+        return this.runDemoMutation(() => demoApi.gradeAssignment(this.demoRole, submissionId, values));
+      }
       const payload = await routeJson("/lms/api/doctor/grade_assignment", {
         submission_id: submissionId,
         score: values.score,
@@ -1193,6 +1285,9 @@ export const useLmsStore = defineStore("lms", {
     },
 
     async createAttendanceSession(values) {
+      if (this.environmentMode === "demo") {
+        return this.runDemoMutation(() => demoApi.createAttendanceSession(this.demoRole, values));
+      }
       const payload = await routeJson("/lms/api/doctor/create_attendance_session", {
         course_id: values.courseId,
         name: values.name,
@@ -1205,6 +1300,9 @@ export const useLmsStore = defineStore("lms", {
     },
 
     async saveAttendance(sessionId, records, closeSession = false) {
+      if (this.environmentMode === "demo") {
+        return this.runDemoMutation(() => demoApi.saveAttendance(this.demoRole, sessionId, records, closeSession));
+      }
       const payload = await routeJson("/lms/api/doctor/save_attendance", {
         session_id: sessionId,
         records,
@@ -1215,6 +1313,9 @@ export const useLmsStore = defineStore("lms", {
     },
 
     async reopenAttendanceSession(sessionId) {
+      if (this.environmentMode === "demo") {
+        return this.runDemoMutation(() => demoApi.reopenAttendanceSession(this.demoRole, sessionId));
+      }
       const payload = await routeJson("/lms/api/doctor/reopen_attendance", {
         session_id: sessionId,
       });
@@ -1223,11 +1324,16 @@ export const useLmsStore = defineStore("lms", {
     },
 
     async deleteAttendanceSession(sessionId) {
+      if (this.environmentMode === "demo") {
+        return this.runDemoMutation(() => demoApi.deleteAttendanceSession(this.demoRole, sessionId));
+      }
       await rpc("lms.attendance.session", "unlink", [[sessionId]]);
       await this.load();
     },
-
     async submitQuiz(quizId, answers) {
+      if (this.environmentMode === "demo") {
+        return this.runDemoMutation(() => demoApi.submitQuiz(this.demoRole, quizId, answers));
+      }
       const payload = await routeJson("/lms/api/submit_quiz", {
         quiz_id: quizId,
         answers,

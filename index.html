@@ -2,13 +2,28 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Xrevia University LMS</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
   </head>
   <body>
     <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const useStaticBuild = window.location.hostname.endsWith("github.io") || params.get("static") === "1";
+
+      if (useStaticBuild) {
+        const style = document.createElement("link");
+        style.rel = "stylesheet";
+        style.href = "./assets/app.css";
+        document.head.appendChild(style);
+      }
+
+      const moduleScript = document.createElement("script");
+      moduleScript.type = "module";
+      moduleScript.src = useStaticBuild ? "./assets/app.js" : "/src/main.js";
+      document.body.appendChild(moduleScript);
+    </script>
   </body>
 </html>
